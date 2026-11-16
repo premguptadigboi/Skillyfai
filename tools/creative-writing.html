@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Creative Writing Prompts · Skillyfai</title>
+<link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Andika:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<style>
+  .prompt { background: linear-gradient(135deg, var(--coral-soft), var(--amber-soft)); border-radius: 22px; padding: 26px; text-align: center; border: 1px solid var(--border); }
+  .prompt .em { font-size: 4rem; letter-spacing: 10px; line-height: 1.1; }
+  .prompt h2 { font-family: var(--font-kid); font-size: clamp(1.4rem, 3vw, 2rem); margin: 10px 0 6px; }
+  .dice { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .dice span { width: 86px; height: 86px; border-radius: 18px; background: var(--surface); border: 2px solid var(--border); display: grid; place-items: center; font-size: 2.8rem; box-shadow: 0 5px 0 var(--border); }
+  .dice span.roll { animation: pop .5s ease; }
+  .writebox { font-family: var(--font-kid); font-size: 1.25rem; line-height: 1.9; width: 100%; min-height: 260px; padding: 16px 18px; border-radius: 16px; border: 2px solid var(--border-strong); background: #fffdf7; color: #222;
+    background-image: repeating-linear-gradient(transparent, transparent 2.35em, #dfe5f5 2.35em, #dfe5f5 2.4em); background-attachment: local; }
+  .bank { display: flex; flex-wrap: wrap; gap: 6px; }
+  .bank button { font-family: var(--font-kid); border: 1px solid var(--border); background: var(--surface-2); border-radius: 999px; padding: 4px 12px; cursor: pointer; font-size: .95rem; color: var(--text); }
+  .bank button:hover { border-color: var(--coral); }
+</style>
+</head>
+<body data-root=".." data-page="writing">
+<main>
+  <div id="tool-hero" data-tool="creative-writing"></div>
+  <div class="wrap" style="margin-top:14px">
+    <div class="row" style="margin-bottom:14px"><div class="chips" id="types"></div><span class="spacer"></span>
+      <div class="seg" id="age"><button data-a="young" class="on">Ages 6–9</button><button data-a="older">Ages 10–14</button></div></div>
+    <div class="prompt kid" id="prompt"></div>
+  </div>
+  <div class="wrap split">
+    <div>
+      <div class="panel">
+        <div class="panel-head"><h2>My writing</h2><div class="row"><span class="badge" id="wc">0 words</span><span class="badge" id="tmr">No timer</span>
+          <select class="select" id="timer" style="width:auto;padding:6px 8px" aria-label="Writing timer"><option value="0">Timer off</option><option value="5">5 min</option><option value="10">10 min</option><option value="15">15 min</option><option value="20">20 min</option></select></div></div>
+        <input class="input" id="title" placeholder="Title of my story" style="font-family:var(--font-kid);font-size:1.2rem;font-weight:700;margin-bottom:10px">
+        <textarea class="writebox" id="write" placeholder="Start writing here…"></textarea>
+        <div class="row" style="margin-top:10px"><button class="btn btn-primary btn-sm" id="save">Save</button><button class="btn btn-ghost btn-sm" id="read">🔊 Read aloud</button><button class="btn btn-ghost btn-sm" id="print">Print</button><button class="btn btn-ghost btn-sm" id="clearW">New page</button></div>
+      </div>
+      <div class="panel"><div class="panel-head"><h2>My saved writing</h2></div><ul class="saved" id="lib"></ul></div>
+    </div>
+    <div class="sticky">
+      <div class="panel"><h2>Word bank</h2><p class="small muted">Tap a word to add it.</p><div class="bank" id="bank"></div></div>
+      <div class="panel"><h2>Writer's checklist</h2><div id="checklist"></div></div>
+      <div class="panel"><h2>Story plan</h2><ol class="small" style="padding-left:18px;margin:0;color:var(--muted)"><li><b>Who</b> is in the story?</li><li><b>Where</b> and <b>when</b> does it happen?</li><li>What <b>problem</b> happens?</li><li>How is it <b>solved</b>?</li><li>How does it <b>end</b>? How do they feel?</li></ol></div>
+    </div>
+  </div>
+  <div id="printArea" hidden></div>
+  <div id="related" data-tool="creative-writing"></div>
+</main>
+<script src="../assets/js/catalog.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+(function () {
+  const { $, $$, esc, h, store, pick, shuffle, speak, toast, uid, printEl } = SK;
+  const P = {
+    "Story starters": { young: ["One morning, I opened my school bag and found a tiny talking frog inside…", "The rain stopped and a rainbow came down right into our garden…", "My cat started wearing a hat and nobody knew why…", "I found a magic pencil. Everything I drew came alive…", "The elephant at the fair winked at me…"],
+      older: ["The old radio in my grandfather's room crackled to life at midnight and said my name…", "When the electricity went out across the whole town, we discovered something strange in the sky…", "The map fell out of a library book, and one place on it was circled in red…", "On the first day at my new school, I realised I could hear what the trees were saying…", "The message in the bottle was written in my own handwriting…"] },
+    "What if…": { young: ["What if animals could talk for one day?", "What if you were as small as an ant?", "What if it rained sweets?", "What if your toys came alive at night?", "What if you could fly to school?"],
+      older: ["What if there were no mobile phones for a year?", "What if you could visit any time in history?", "What if your village had to run without money for a week?", "What if children ran the government for a day?", "What if you woke up speaking every language in the world?"] },
+    "Describe it": { young: ["Describe your favourite food. How does it look, smell and taste?", "Describe your best friend.", "Describe a rainy day.", "Describe your school playground.", "Describe a festival you love."],
+      older: ["Describe a busy market using all five senses.", "Describe the place where you feel most peaceful.", "Describe a storm from the point of view of a tree.", "Describe a person you admire without naming them.", "Describe your town 50 years in the future."] },
+    "Letter & diary": { young: ["Write a letter to your favourite animal.", "Write a diary page about your best day ever.", "Write a thank-you note to someone who helps you.", "Write a letter to the moon."],
+      older: ["Write a diary entry as a soldier guarding the border on a festival night.", "Write a letter to your future self, to be opened in 10 years.", "Write a letter to the Chief Minister about a problem in your area.", "Write a diary entry from the point of view of a stray dog."] },
+    "Picture prompt": { young: ["🐘🎪🎈", "🚀🌕👽", "🏝️🏴‍☠️💰", "🐉🏰👑", "🌳🏠🐿️"], older: ["🌋🏃‍♀️🚁", "🕵️🔍🗝️", "🌊⛵🌧️", "🏚️🕯️👣", "🤖🧑‍🔬⚡"] },
+    "Story dice": { young: [], older: [] }
+  };
+  const DICE = ["🐶", "🌧️", "🏰", "🚂", "🍎", "🔑", "🌙", "🎁", "🐸", "🌳", "⚽", "🚲", "👑", "🐟", "⛰️", "📦", "🕯️", "🦋", "🎈", "🧭", "🐘", "🌈", "🍦", "📱"];
+  const BANK = {
+    young: ["suddenly", "happy", "giant", "tiny", "shiny", "scared", "laughed", "whispered", "ran", "jumped", "beautiful", "first", "then", "next", "finally", "because", "but", "and so"],
+    older: ["meanwhile", "astonished", "trembling", "glittering", "mysterious", "reluctantly", "however", "although", "eventually", "determined", "echoed", "vast", "fragile", "in the distance", "without warning", "as a result"]
+  };
+  let type = store.get("cr:type", "Story starters"), age = store.get("cr:age", "young"), current = "", cur = store.get("cr:draft", { id: null, title: "", text: "" });
+
+  function paintTypes() { $("#types").innerHTML = Object.keys(P).map((k) => `<button class="chip ${k === type ? "on" : ""}" data-t="${k}">${k}</button>`).join(""); $$("#age button").forEach((b) => b.classList.toggle("on", b.dataset.a === age)); }
+  function newPrompt() {
+    if (type === "Story dice") {
+      const n = age === "young" ? 3 : 5, d = shuffle(DICE).slice(0, n); current = "Story dice: " + d.join(" ");
+      $("#prompt").innerHTML = `<div class="dice">${d.map((x) => `<span class="roll">${x}</span>`).join("")}</div><h2>Write a story that uses all ${n} pictures.</h2><button class="kid-btn coral" id="np">🎲 Roll again</button>`;
+    } else if (type === "Picture prompt") {
+      const p = pick(P[type][age]); current = "Picture: " + p;
+      $("#prompt").innerHTML = `<div class="em">${p}</div><h2>What is happening in this picture? Write a story about it.</h2><button class="kid-btn coral" id="np">🔀 New picture</button>`;
+    } else {
+      const p = pick(P[type][age]); current = p;
+      $("#prompt").innerHTML = `<span class="badge" style="font-family:var(--font)">${type}</span><h2>${esc(p)}</h2><div class="row" style="justify-content:center"><button class="kid-btn ghost" id="hearP">🔊 Hear it</button><button class="kid-btn coral" id="np">🔀 New prompt</button></div>`;
+    }
+    $("#bank").innerHTML = BANK[age].map((w) => `<button>${w}</button>`).join("");
+  }
+  $("#prompt").addEventListener("click", (e) => { if (e.target.id === "np") newPrompt(); if (e.target.id === "hearP") speak(current, { rate: .85 }); });
+  $("#types").onclick = (e) => { const b = e.target.closest("[data-t]"); if (!b) return; type = b.dataset.t; store.set("cr:type", type); paintTypes(); newPrompt(); };
+  $("#age").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; age = b.dataset.a; store.set("cr:age", age); paintTypes(); newPrompt(); };
+  $("#bank").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; const t = $("#write"), s = t.selectionStart ?? t.value.length;
+    const ins = (s && !/\s$/.test(t.value.slice(0, s)) ? " " : "") + b.textContent + " "; t.value = t.value.slice(0, s) + ins + t.value.slice(s); t.focus(); t.selectionStart = t.selectionEnd = s + ins.length; onWrite(); };
+
+  function checklist() {
+    const v = $("#write").value, sents = v.split(/[.!?]+/).filter((s) => s.trim()), words = v.trim().split(/\s+/).filter(Boolean);
+    const items = [
+      ["Has a title", !!$("#title").value.trim()],
+      ["Sentences start with capital letters", sents.length > 0 && sents.every((s) => /^[A-Z"'“]/.test(s.trim()))],
+      ["Sentences end with . ! or ?", /[.!?]["'”]?\s*$/.test(v.trim())],
+      [`At least ${age === "young" ? 30 : 120} words`, words.length >= (age === "young" ? 30 : 120)],
+      ["Uses a joining word (and, but, because…)", /\b(and|but|because|so|then|when|although|however)\b/i.test(v)],
+      ["Has more than one paragraph", age === "young" || /\n\s*\n|\n/.test(v.trim())]
+    ];
+    $("#checklist").innerHTML = `<ul class="saved">${items.map(([t, ok]) => `<li style="color:${ok ? "var(--success)" : "var(--muted)"}">${ok ? "✔" : "○"} ${t}</li>`).join("")}</ul>`;
+    $("#wc").textContent = words.length + " words";
+  }
+  function onWrite() { cur.title = $("#title").value; cur.text = $("#write").value; cur.prompt = current; store.set("cr:draft", cur); checklist(); }
+  $("#write").oninput = onWrite; $("#title").oninput = onWrite;
+
+  let tEnd = 0, tI = null;
+  $("#timer").onchange = (e) => { clearInterval(tI); const m = +e.target.value; if (!m) { $("#tmr").textContent = "No timer"; return; }
+    tEnd = Date.now() + m * 60000; tI = setInterval(() => { const s = Math.max(0, Math.round((tEnd - Date.now()) / 1000)); $("#tmr").textContent = "⏱ " + Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+      if (!s) { clearInterval(tI); toast("⏰ Time's up! Read your writing once more and check it."); } }, 500); };
+
+  const lib = () => store.get("cr:lib", []);
+  function paintLib() { $("#lib").innerHTML = lib().map((x) => `<li data-id="${x.id}"><span class="s-name">${esc(x.title || "Untitled")}</span><small class="muted">${new Date(x.d).toLocaleDateString()}</small><button data-o>Open</button><button data-x>✕</button></li>`).join("") || '<li class="muted">Your saved stories appear here.</li>'; }
+  $("#save").onclick = () => { if (!$("#write").value.trim()) return toast("Write something first"); const l = lib(); if (!cur.id) cur.id = uid(); const it = { id: cur.id, title: $("#title").value, text: $("#write").value, prompt: current, d: Date.now() };
+    const i = l.findIndex((x) => x.id === cur.id); i >= 0 ? (l[i] = it) : l.unshift(it); store.set("cr:lib", l); store.set("cr:draft", cur); paintLib(); toast("Saved"); };
+  $("#lib").onclick = (e) => { const li = e.target.closest("li[data-id]"); if (!li) return; const l = lib(), x = l.find((y) => y.id === li.dataset.id);
+    if (e.target.closest("[data-o]")) { cur = { id: x.id, title: x.title, text: x.text }; $("#title").value = x.title; $("#write").value = x.text; onWrite(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    if (e.target.closest("[data-x]") && confirm("Delete this piece of writing?")) { store.set("cr:lib", l.filter((y) => y.id !== x.id)); paintLib(); } };
+  $("#clearW").onclick = () => { if ($("#write").value.trim() && !confirm("Start a new page? Save first if you want to keep this one.")) return; cur = { id: null, title: "", text: "" }; $("#title").value = ""; $("#write").value = ""; onWrite(); };
+  $("#read").onclick = () => speak(($("#title").value ? $("#title").value + ". " : "") + $("#write").value || "Write something first.", { rate: .9 });
+  $("#print").onclick = () => { const a = $("#printArea"); a.hidden = false;
+    a.innerHTML = `<div style="font-family:Andika,sans-serif;padding:10px"><p style="color:#666;font-size:.9rem">${esc(current)}</p><h2>${esc($("#title").value || "My writing")}</h2><p style="white-space:pre-wrap;font-size:1.15rem;line-height:1.9">${esc($("#write").value)}</p></div>`;
+    printEl(a); setTimeout(() => (a.hidden = true), 1000); };
+
+  $("#title").value = cur.title || ""; $("#write").value = cur.text || "";
+  paintTypes(); newPrompt(); checklist(); paintLib();
+})();
+</script>
+</body>
+</html>

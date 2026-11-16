@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Letter Writing Practice · Skillyfai</title>
+<link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Andika:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<style>
+  .letters { display: grid; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); gap: 6px; }
+  .letters button { font-family: var(--font-kid); font-size: 1.35rem; font-weight: 700; aspect-ratio: 1; border-radius: 12px; border: 2px solid var(--border); background: var(--surface); cursor: pointer; color: var(--text); }
+  .letters button.on { background: var(--coral); border-color: var(--coral); color: #fff; }
+  .letters button.done { border-color: var(--success); }
+  .tools { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 16px; }
+  .swatch { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--border); cursor: pointer; }
+  .swatch.on { box-shadow: 0 0 0 3px var(--text); }
+  .stars { font-size: 2rem; min-height: 2.6rem; text-align: center; margin-top: 8px; letter-spacing: 6px; }
+  .letter-doc { font-family: var(--font-kid); font-size: 1.1rem; line-height: 1.8; background: #fffdf7; color: #222; border: 1px solid var(--border); border-radius: 14px; padding: 28px; }
+  .letter-doc .r { text-align: right; }
+</style>
+</head>
+<body data-root=".." data-page="writing">
+<main>
+  <div id="tool-hero" data-tool="letter-writing"></div>
+  <div class="wrap" style="margin-top:14px">
+    <div class="seg" id="tabs" style="margin-bottom:16px"><button data-v="trace" class="on">🔠 Trace letters</button><button data-v="frame">✉️ Write a letter</button></div>
+  </div>
+
+  <div class="wrap split" id="v-trace">
+    <div class="sticky">
+      <div class="panel">
+        <div class="seg" id="sets" style="margin-bottom:12px"><button data-s="upper" class="on">A B C</button><button data-s="lower">a b c</button><button data-s="pair">Aa</button><button data-s="num">1 2 3</button></div>
+        <div class="letters" id="letters"></div>
+        <p class="small muted" style="margin:12px 0 0">Green border = traced with 2 or more stars.</p>
+      </div>
+    </div>
+    <div class="kid-card kid">
+      <div class="row" style="justify-content:space-between;margin-bottom:12px"><span class="badge" id="hint" style="font-family:var(--font)"></span><span class="stars-bar">⭐ <span id="total">0</span></span></div>
+      <div id="pad"></div>
+      <div class="stars" id="stars"></div>
+      <div class="tools">
+        <button class="kid-btn" id="say">🔊 Listen</button>
+        <button class="kid-btn mint" id="check">✔ Check</button>
+        <button class="kid-btn ghost" id="undo">↶ Undo</button>
+        <button class="kid-btn ghost" id="clear">🧽 Clear</button>
+        <button class="kid-btn coral" id="next">Next ➜</button>
+      </div>
+      <div class="tools" id="colors"></div>
+      <div class="tools"><label class="check" style="font-family:var(--font)"><input type="checkbox" id="guideOn" checked> <span>Show dotted letter (turn off to write from memory)</span></label></div>
+    </div>
+  </div>
+
+  <div class="wrap split" id="v-frame" hidden>
+    <div class="sticky">
+      <div class="panel">
+        <div class="field"><label for="kind">Type of letter</label><select class="select" id="kind"><option>Informal (to a friend or family)</option><option>Formal (to a principal or officer)</option></select></div>
+        <div class="field"><label>Topic ideas</label><div class="suggest" id="topics"></div></div>
+        <div class="field"><label for="from">Your address</label><textarea class="textarea" id="from" rows="2" placeholder="House no., street&#10;Town, District"></textarea></div>
+        <div class="grid-2"><div class="field"><label for="date">Date</label><input class="input" id="date"></div><div class="field"><label for="to">To</label><input class="input" id="to" placeholder="e.g. Dear Riya"></div></div>
+        <div class="field" id="subjWrap" hidden><label for="subj">Subject</label><input class="input" id="subj" placeholder="e.g. Request for leave"></div>
+        <div class="field"><label for="p1">Opening: why are you writing?</label><textarea class="textarea" id="p1" rows="2"></textarea></div>
+        <div class="field"><label for="p2">Main part: tell the details</label><textarea class="textarea" id="p2" rows="3"></textarea></div>
+        <div class="field"><label for="p3">Closing: a wish, request or question</label><textarea class="textarea" id="p3" rows="2"></textarea></div>
+        <div class="grid-2"><div class="field"><label for="close">Closing</label><input class="input" id="close"></div><div class="field"><label for="name">Your name</label><input class="input" id="name"></div></div>
+      </div>
+    </div>
+    <div class="panel" id="letterOut">
+      <div class="panel-head no-print"><h2>My letter</h2><div class="toolbar"><button class="btn btn-ghost btn-sm" id="readLetter">🔊 Read aloud</button><button class="btn btn-primary btn-sm" id="printLetter">Print</button></div></div>
+      <div class="letter-doc" id="letter"></div>
+      <div class="note no-print" style="margin-top:14px" id="tips"></div>
+    </div>
+  </div>
+  <div id="related" data-tool="letter-writing"></div>
+</main>
+<script src="../assets/js/catalog.js"></script>
+<script src="../assets/js/core.js"></script>
+<script src="../assets/js/writing.js"></script>
+<script>
+(function () {
+  const { $, $$, esc, store, speak, celebrate, toast, printEl } = SK;
+  /* ---------- tabs ---------- */
+  $("#tabs").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; $$("#tabs button").forEach((x) => x.classList.toggle("on", x === b)); $("#v-trace").hidden = b.dataset.v !== "trace"; $("#v-frame").hidden = b.dataset.v !== "frame"; if (b.dataset.v === "trace") pad.redraw(); };
+
+  /* ---------- tracing ---------- */
+  const UP = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), WORD = { a: "apple", b: "ball", c: "cat", d: "dog", e: "egg", f: "fish", g: "goat", h: "hat", i: "ink", j: "jug", k: "kite", l: "lion", m: "mango", n: "nest", o: "orange", p: "pen", q: "queen", r: "rat", s: "sun", t: "tree", u: "umbrella", v: "van", w: "watch", x: "box", y: "yak", z: "zebra" };
+  const SETS = { upper: UP, lower: UP.map((c) => c.toLowerCase()), pair: UP.map((c) => c + c.toLowerCase()), num: "0123456789".split("") };
+  let set = store.get("lw:set", "upper"), idx = 0, total = store.get("lw:stars", 0);
+  const done = new Set(store.get("lw:done", []));
+  const pad = SKTrace($("#pad"), { text: "" });
+  function paintSet() {
+    $$("#sets button").forEach((b) => b.classList.toggle("on", b.dataset.s === set));
+    $("#letters").innerHTML = SETS[set].map((c, i) => `<button class="${i === idx ? "on" : ""} ${done.has(c) ? "done" : ""}" data-i="${i}">${c}</button>`).join("");
+  }
+  function go(i) {
+    idx = (i + SETS[set].length) % SETS[set].length; const c = SETS[set][idx];
+    pad.setText(c); $("#stars").textContent = ""; paintSet();
+    const w = WORD[c[0].toLowerCase()]; $("#hint").textContent = w ? `${c}  as in  ${w}` : `Number ${c}`;
+    $("#total").textContent = total;
+  }
+  $("#sets").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; set = b.dataset.s; store.set("lw:set", set); go(0); };
+  $("#letters").onclick = (e) => { const b = e.target.closest("button"); if (b) go(+b.dataset.i); };
+  $("#say").onclick = () => { const c = SETS[set][idx], w = WORD[c[0].toLowerCase()]; speak(set === "num" ? c : `${c[0]}. ${c[0]} for ${w}`, { rate: .8 }); };
+  $("#check").onclick = () => {
+    if (!pad.hasInk()) { toast("Trace the letter first"); return; }
+    const r = pad.check(); $("#stars").textContent = "⭐".repeat(r.stars) + "☆".repeat(3 - r.stars);
+    $("#stars").classList.remove("pop"); void $("#stars").offsetWidth; $("#stars").classList.add("pop");
+    if (r.stars >= 2) { const c = SETS[set][idx]; if (!done.has(c)) { done.add(c); store.set("lw:done", [...done]); } total += r.stars; store.set("lw:stars", total); $("#total").textContent = total; paintSet(); if (r.stars === 3) { celebrate(); speak("Excellent!"); } else speak("Good job!"); }
+    else speak(r.off > .5 ? "Try to stay on the dotted lines." : "Keep going. Trace the whole letter.");
+  };
+  $("#undo").onclick = () => pad.undo(); $("#clear").onclick = () => { pad.clear(); $("#stars").textContent = ""; };
+  $("#next").onclick = () => go(idx + 1);
+  $("#guideOn").onchange = (e) => pad.setGuide(e.target.checked);
+  const COLS = ["#3b3bb3", "#e5484d", "#18a88f", "#d98a00", "#8e4ec6", "#222222"];
+  $("#colors").innerHTML = COLS.map((c, i) => `<button class="swatch ${i ? "" : "on"}" style="background:${c}" data-c="${c}" aria-label="Pen colour"></button>`).join("");
+  $("#colors").onclick = (e) => { const b = e.target.closest(".swatch"); if (!b) return; $$(".swatch").forEach((x) => x.classList.toggle("on", x === b)); pad.setColor(b.dataset.c); };
+  go(0);
+
+  /* ---------- letter frame ---------- */
+  const TOPICS = {
+    inf: ["Invite a friend to your birthday", "Tell your grandmother about your school", "Thank your uncle for a gift", "Describe your holiday to a friend", "Tell a friend about your new pet"],
+    for: ["Leave application to the principal", "Request for a library card", "Complaint about a broken tap in school", "Request to start a games period", "Request to the officer to clean the drain"]
+  };
+  const F = ["from", "date", "to", "subj", "p1", "p2", "p3", "close", "name"];
+  const saved = store.get("lw:letter", {});
+  const formal = () => $("#kind").selectedIndex === 1;
+  function defaults() {
+    if (!$("#date").value) $("#date").value = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+    $("#to").placeholder = formal() ? "The Principal, ABC School, Town" : "Dear Riya,";
+    $("#close").placeholder = formal() ? "Yours obediently," : "Your loving friend,";
+    $("#subjWrap").hidden = !formal();
+    $("#topics").innerHTML = TOPICS[formal() ? "for" : "inf"].map((t) => `<button type="button">${t}</button>`).join("");
+  }
+  function paintLetter() {
+    const v = Object.fromEntries(F.map((k) => [k, $("#" + k).value.trim()]));
+    const P = (s, ph) => s ? esc(s).replace(/\n/g, "<br>") : `<span style="color:#aaa">${ph}</span>`;
+    $("#letter").innerHTML = formal()
+      ? `<p>${P(v.from, "Your address")}</p><p>${P(v.date, "Date")}</p><p>To,<br>${P(v.to, "The Principal,<br>School name, Town")}</p>
+         <p><b>Subject:</b> ${P(v.subj, "What the letter is about")}</p><p>Respected Sir / Madam,</p>
+         <p>${P(v.p1, "I am writing to…")}</p><p>${P(v.p2, "Details…")}</p><p>${P(v.p3, "I request you to… Thank you.")}</p>
+         <p>${P(v.close, "Yours obediently,")}<br>${P(v.name, "Your name")}</p>`
+      : `<p class="r">${P(v.from, "Your address")}<br>${P(v.date, "Date")}</p><p>${P(v.to, "Dear …,")}</p>
+         <p>${P(v.p1, "I hope you are well. I am writing to tell you…")}</p><p>${P(v.p2, "Tell your news here…")}</p><p>${P(v.p3, "Please write back soon.")}</p>
+         <p>${P(v.close, "Your loving friend,")}<br>${P(v.name, "Your name")}</p>`;
+    const tips = [];
+    if (v.p1 && !/^[A-Z]/.test(v.p1)) tips.push("Start your sentences with a capital letter.");
+    if ([v.p1, v.p2, v.p3].some((p) => p && !/[.!?]$/.test(p))) tips.push("End each paragraph with a full stop.");
+    if (formal() && !v.subj) tips.push("Formal letters need a subject line.");
+    if (!formal() && v.to && !/,$/.test(v.to)) tips.push("Put a comma after the greeting, e.g. “Dear Riya,”.");
+    $("#tips").innerHTML = tips.length ? "💡 " + tips.join(" ") : "✅ Your letter has all the parts: address, date, greeting, body, closing and name.";
+    store.set("lw:letter", Object.assign(v, { kind: $("#kind").selectedIndex }));
+  }
+  F.forEach((k) => { if (saved[k]) $("#" + k).value = saved[k]; }); if (saved.kind) $("#kind").selectedIndex = saved.kind;
+  $("#v-frame").addEventListener("input", paintLetter);
+  $("#kind").onchange = () => { defaults(); paintLetter(); };
+  $("#topics").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; if (formal()) $("#subj").value = b.textContent; else $("#p1").value = "I am writing to " + b.textContent.charAt(0).toLowerCase() + b.textContent.slice(1) + "."; paintLetter(); };
+  $("#readLetter").onclick = () => speak($("#letter").innerText, { rate: .9 });
+  $("#printLetter").onclick = () => printEl($("#letterOut"));
+  defaults(); paintLetter();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Word Reading Practice · Skillyfai</title>
+<link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Andika:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<style>
+  .flash { text-align: center; padding: 34px 20px; }
+  .flash .kid-word { margin: 18px 0 8px; min-height: 1.2em; }
+  .flash .acts { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 18px; }
+  .heard { min-height: 28px; font-weight: 700; }
+  .wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+  .wall button { font-family: var(--font-kid); font-size: 1.35rem; font-weight: 700; padding: 14px 6px; border-radius: 14px; border: 2px solid var(--border); background: var(--surface); cursor: pointer; color: var(--text); }
+  .wall button.known { border-color: var(--success); background: color-mix(in srgb, var(--success) 12%, var(--surface)); }
+  .wall button:hover { border-color: var(--mint); }
+  .pbar { height: 10px; background: var(--bg-soft); border-radius: 999px; overflow: hidden; }
+  .pbar i { display: block; height: 100%; background: var(--mint); transition: width .3s; }
+</style>
+</head>
+<body data-root=".." data-page="reading">
+<main>
+  <div id="tool-hero" data-tool="word-reading"></div>
+  <div class="wrap" style="margin-top:16px">
+    <div class="row" style="margin-bottom:14px">
+      <div class="chips" id="lists"></div><span class="spacer"></span>
+      <div class="seg" id="mode"><button data-m="cards" class="on">🃏 Flashcards</button><button data-m="wall">🧱 Word wall</button></div>
+    </div>
+    <div class="row small muted" style="margin-bottom:6px"><span id="progTxt"></span></div>
+    <div class="pbar" style="margin-bottom:18px"><i id="prog"></i></div>
+
+    <div id="cards" class="kid-card kid flash">
+      <div class="row" style="justify-content:space-between"><span class="badge" id="pos"></span><span class="stars-bar">⭐ <span id="stars">0</span></span></div>
+      <div class="kid-word" id="word"></div>
+      <div class="heard" id="heard"></div>
+      <div class="acts">
+        <button class="kid-btn" id="listen">🔊 Listen</button>
+        <button class="kid-btn amber" id="say" title="Say the word into the microphone">🎤 Say it</button>
+        <button class="kid-btn mint" id="know">✔ I know it</button>
+        <button class="kid-btn ghost" id="next">Next ➜</button>
+      </div>
+      <div class="row" style="justify-content:center;margin-top:22px;gap:16px">
+        <label class="check"><input type="checkbox" id="flashOn"> <span>Flash mode: next word every</span></label>
+        <select class="select" id="speed" style="width:auto"><option value="2000">2 s</option><option value="3000" selected>3 s</option><option value="5000">5 s</option></select>
+        <label class="check"><input type="checkbox" id="onlyNew" checked> <span>Skip known words</span></label>
+      </div>
+    </div>
+
+    <div id="wall" class="panel kid" hidden>
+      <p class="small muted" style="font-family:var(--font)">Tap a word to hear it. Green words are known.</p>
+      <div class="wall" id="wallGrid"></div>
+    </div>
+
+    <div class="panel" style="margin-top:16px">
+      <div class="panel-head"><h2>My words</h2><button class="btn btn-ghost btn-sm" id="resetProg">Reset progress for this list</button></div>
+      <div class="field"><label for="mine">Add your own word list (comma or new line separated). It appears as "My words".</label>
+        <textarea class="textarea" id="mine" rows="3" placeholder="e.g. school, teacher, friend"></textarea></div>
+      <p class="small muted" id="srNote" style="margin:0"></p>
+    </div>
+  </div>
+  <div id="related" data-tool="word-reading"></div>
+</main>
+<script src="../assets/js/catalog.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+(function () {
+  const { $, $$, esc, store, shuffle, toast, speak, listen, hasSR, celebrate } = SK;
+  const LISTS = {
+    "Sight words 1": "a and away big blue can come down find for funny go help here I in is it jump little look make me my not one play red run said see the three to two up we where yellow you",
+    "Sight words 2": "all am are at ate be black brown but came did do eat four get good have he into like must new no now on our out please pretty ran ride saw say she so soon that there they this too under want was well went what white who will with yes",
+    "Sight words 3": "after again an any as ask by could every fly from give going had has her him his how just know let live may of old once open over put round some stop take thank them then think walk were when",
+    "CVC words": "cat bat hat map pen hen bed pig sit pin dog pot top sun bus cup mud rug fox net",
+    "Colours & numbers": "red blue green yellow black white pink orange one two three four five six seven eight nine ten"
+  };
+  const getLists = () => { const m = store.get("wr:mine", ""); const L = Object.assign({}, LISTS); if (m.trim()) L["My words"] = m; return L; };
+  let list = store.get("wr:list", "Sight words 1"), order = [], i = 0, stars = store.get("wr:stars", 0), flashT = null;
+  const words = () => (getLists()[list] || LISTS["Sight words 1"]).split(/[\s,]+/).map((w) => w.trim()).filter(Boolean);
+  const known = () => new Set(store.get("wr:known:" + list, []));
+  const setKnown = (s) => store.set("wr:known:" + list, [...s]);
+
+  function paintLists() {
+    const L = getLists(); if (!L[list]) list = "Sight words 1";
+    $("#lists").innerHTML = Object.keys(L).map((k) => `<button class="chip ${k === list ? "on" : ""}" data-l="${esc(k)}">${esc(k)}</button>`).join("");
+  }
+  function build() {
+    const k = known(); const ws = words();
+    order = shuffle($("#onlyNew").checked ? ws.filter((w) => !k.has(w)) : ws);
+    if (!order.length) order = shuffle(ws);
+    i = 0; paint(); paintWall();
+  }
+  function progress() {
+    const ws = words(), k = known(), n = ws.filter((w) => k.has(w)).length;
+    $("#prog").style.width = (n / ws.length) * 100 + "%"; $("#progTxt").textContent = `${list}: ${n} of ${ws.length} words known`;
+  }
+  function paint() {
+    const w = order[i % order.length];
+    $("#word").textContent = w; $("#word").classList.remove("pop"); void $("#word").offsetWidth; $("#word").classList.add("pop");
+    $("#pos").textContent = `${(i % order.length) + 1} / ${order.length}`; $("#heard").textContent = ""; $("#stars").textContent = stars; progress();
+  }
+  function paintWall() { const k = known(); $("#wallGrid").innerHTML = words().map((w) => `<button class="${k.has(w) ? "known" : ""}">${esc(w)}</button>`).join(""); progress(); }
+  const next = () => { i++; if (i >= order.length) { i = 0; order = shuffle(order); } paint(); };
+
+  $("#lists").onclick = (e) => { const b = e.target.closest("[data-l]"); if (!b) return; list = b.dataset.l; store.set("wr:list", list); paintLists(); build(); };
+  $("#listen").onclick = () => speak($("#word").textContent, { rate: .8 });
+  $("#next").onclick = next;
+  $("#know").onclick = () => { const k = known(); const w = $("#word").textContent; if (!k.has(w)) { k.add(w); setKnown(k); stars++; store.set("wr:stars", stars); }
+    if (words().every((x) => k.has(x))) { celebrate(); toast("🎉 You know every word in " + list + "!"); } next(); };
+  $("#say").onclick = async () => {
+    if (!hasSR) { toast("Speech check works in Chrome or Edge. Use Listen and I know it instead."); return; }
+    const w = $("#word").textContent.toLowerCase(); $("#heard").textContent = "🎙 Listening…";
+    try {
+      const alts = await listen();
+      const ok = alts.some((a) => a.split(/\s+/).includes(w) || a === w);
+      if (ok) { $("#heard").innerHTML = '<span style="color:var(--success)">✔ Great reading!</span>'; stars++; store.set("wr:stars", stars); $("#stars").textContent = stars; const k = known(); k.add($("#word").textContent); setKnown(k); progress(); celebrate(); }
+      else $("#heard").innerHTML = alts.length ? `<span style="color:var(--amber)">I heard “${esc(alts[0])}”. Listen and try again.</span>` : '<span class="muted">I did not hear anything. Try again.</span>';
+    } catch (e) { $("#heard").textContent = e.message === "not-allowed" ? "Please allow the microphone." : "Speech check is not available right now."; }
+  };
+  $("#flashOn").onchange = () => { clearInterval(flashT); if ($("#flashOn").checked) flashT = setInterval(next, +$("#speed").value); };
+  $("#speed").onchange = () => $("#flashOn").onchange();
+  $("#onlyNew").onchange = build;
+  $("#mode").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; $$("#mode button").forEach((x) => x.classList.toggle("on", x === b)); $("#cards").hidden = b.dataset.m !== "cards"; $("#wall").hidden = b.dataset.m !== "wall"; if (b.dataset.m === "wall") { $("#flashOn").checked = false; clearInterval(flashT); paintWall(); } };
+  $("#wallGrid").onclick = (e) => { const b = e.target.closest("button"); if (b) speak(b.textContent, { rate: .8 }); };
+  $("#mine").value = store.get("wr:mine", "");
+  $("#mine").oninput = () => { store.set("wr:mine", $("#mine").value); paintLists(); };
+  $("#mine").onchange = () => { if ($("#mine").value.trim()) { list = "My words"; store.set("wr:list", list); paintLists(); build(); } };
+  $("#resetProg").onclick = () => { if (confirm("Reset known words for " + list + "?")) { setKnown(new Set()); build(); } };
+  $("#srNote").textContent = hasSR ? "🎤 Say it uses your browser's free speech recognition (it needs internet in Chrome)." : "🎤 Say it needs Chrome or Edge. Other features work everywhere.";
+  paintLists(); build();
+})();
+</script>
+</body>
+</html>

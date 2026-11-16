@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sound Friends - English Reading</title>
+<style>
+:root{--ink:#2a2150;--bg:#eef3ff;--card:#fff;--vowel:#ff5a5f;--gold:#ffb703;--line:#cfd8ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Verdana,sans-serif;min-height:100vh}
+header{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fff;border-bottom:4px solid var(--line);position:sticky;top:0;z-index:5}
+#mascot{width:84px;height:84px;flex:none}
+#bubble{background:#fff4c9;border:3px solid var(--gold);border-radius:18px;padding:6px 14px;font-size:1.4rem;font-weight:800;min-width:90px;text-align:center}
+.hd{flex:1;min-width:0}
+#stars{font-size:1.5rem;font-weight:800;white-space:nowrap}
+nav{display:flex;gap:8px;padding:10px 14px;max-width:1000px;margin:auto}
+nav button{flex:1;font:inherit;font-size:1.15rem;font-weight:800;padding:14px 6px;border-radius:16px;border:4px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer}
+nav button.on{background:var(--ink);color:#fff}
+main{max-width:1000px;margin:auto;padding:0 14px 40px}
+section{display:none}section.on{display:block}
+h2{margin:6px 0 4px;font-size:1.4rem}
+p.hint{margin:0 0 12px;opacity:.75}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:10px}
+.tile{font:inherit;font-size:2.2rem;font-weight:800;color:#fff;border:0;border-radius:20px;padding:12px 0;cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.25);touch-action:none;user-select:none;position:relative}
+.tile:active,.tile.hit{transform:translateY(5px);box-shadow:0 1px 0 rgba(0,0,0,.25)}
+.tile small{font-size:1.4rem;opacity:.85;margin-left:2px}
+.tile.ghost{position:fixed;pointer-events:none;z-index:99;width:74px;opacity:.9;transform:scale(1.2) rotate(-6deg)}
+.levels{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.levels button{font:inherit;font-weight:800;font-size:1.05rem;padding:10px 16px;border-radius:14px;border:3px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer}
+.levels button.on{background:#7b5cff;color:#fff;border-color:#7b5cff}
+.bar{height:22px;background:#fff;border:3px solid var(--ink);border-radius:14px;overflow:hidden;margin-bottom:6px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3ddc97,#ffb703);transition:width .5s}
+#barTxt{font-weight:800;margin-bottom:12px}
+.row{display:flex;align-items:center;gap:8px;background:#fff;border:3px solid var(--ink);border-radius:16px;padding:8px}.row b{font-size:1.8rem;width:30px;text-align:center}.row input{font:inherit;font-size:1.2rem;width:100%;min-width:0;padding:6px;border:2px solid var(--line);border-radius:10px}.row button{font:inherit;font-size:1.2rem;border:0;border-radius:10px;background:#3ddc97;padding:8px 12px;cursor:pointer}
+.words{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.word{font:inherit;background:#fff;border:4px solid var(--ink);border-radius:22px;padding:18px 8px;font-size:2.6rem;font-weight:800;cursor:pointer;box-shadow:0 6px 0 var(--ink);color:var(--ink);position:relative}
+.word:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
+.word.done::after{content:"⭐";position:absolute;top:-12px;right:-6px;font-size:1.6rem}
+.word span{display:inline-block;transition:transform .15s,color .15s;padding:0 1px}
+.word span.on{color:#ff5a5f;transform:scale(1.35)}
+.word.all span{color:#12a37f}
+#line{min-height:120px;background:#fff;border:5px dashed #7b5cff;border-radius:24px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;padding:12px;margin-bottom:12px}
+#line.over{background:#f1ecff}
+#line .ph{opacity:.5;font-size:1.2rem}
+#line .l{font-size:3.6rem;font-weight:800;padding:0 4px;margin:0 -2px;border-radius:14px}
+#line.joined .l{background:#ffe8a3;margin:0}
+#line .l.pop{animation:pop .45s}
+@keyframes pop{0%{transform:scale(.3)}60%{transform:scale(1.5) rotate(-6deg)}100%{transform:scale(1)}}
+.acts{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.acts button{font:inherit;font-weight:800;font-size:1.1rem;padding:12px 20px;border-radius:16px;border:4px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer}
+.acts .go{background:#3ddc97}
+.fly{position:fixed;font-size:2.4rem;z-index:100;pointer-events:none;animation:fly .9s ease-out forwards}
+@keyframes fly{to{transform:translateY(-90px) scale(1.6);opacity:0}}
+.spark{position:fixed;width:12px;height:12px;border-radius:50%;z-index:100;pointer-events:none;animation:sp .5s ease-out forwards}
+@keyframes sp{to{transform:translate(var(--x),var(--y)) scale(0);opacity:0}}
+#mouth{transform-box:fill-box;transform-origin:center}
+.talk #mouth{animation:yap .22s infinite alternate}
+@keyframes yap{from{transform:scaleY(.4)}to{transform:scaleY(1.5)}}
+.talk #mascot{animation:bob .5s infinite alternate}
+@keyframes bob{to{transform:translateY(-5px) rotate(3deg)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+nav{flex-wrap:wrap}nav button{min-width:96px;font-size:1.05rem}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.rc{background:#fff;border:4px solid var(--line);border-radius:18px;padding:10px;text-align:center}
+.rc.ok{border-color:#12a37f;background:#eafff6}.rc.rec{border-color:#ff5a5f;background:#fff0f0;animation:pulse 1s infinite alternate}
+@keyframes pulse{to{background:#ffd9d9}}
+.rl{font-size:2.6rem;font-weight:800;line-height:1.1}.rl small{font-size:1.5rem}.st{font-size:.9rem;font-weight:700;min-height:22px;margin:4px 0 8px}
+.rb{display:flex;gap:6px}.rb button{flex:1;font:inherit;font-size:1.3rem;min-height:50px;border-radius:12px;border:3px solid var(--ink);background:#fff;cursor:pointer}
+.rb .big{flex:2.6;font-size:1rem;font-weight:800;background:#ffe27a}
+#sylIn{font:inherit;font-size:1.4rem;padding:12px 14px;border:4px solid var(--ink);border-radius:16px;min-width:0;flex:1;max-width:340px}
+#sylBox{display:none;background:#fff;border:4px solid var(--ink);border-radius:24px;padding:14px;margin:6px 0 16px;text-align:center}
+#sylCount{font-size:1.6rem;font-weight:800;margin-bottom:4px}
+#sylWord{font-size:3.6rem;font-weight:800;line-height:1.3;word-break:break-word}
+#sylWord span{display:inline-block;margin:0 6px;transition:transform .15s}
+#sylWord span.on{transform:scale(1.3)}#sylWord span.all{transform:scale(1.12)}
+.swgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.sw{font:inherit;font-size:1.4rem;font-weight:800;padding:16px 6px;border:4px solid var(--ink);border-radius:18px;background:#fff;color:var(--ink);box-shadow:0 5px 0 var(--ink);cursor:pointer}
+.sw:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
+button:disabled{opacity:.35;cursor:default}
+button:focus-visible{outline:4px solid #ffb703;outline-offset:2px}
+/* FEATURE:SENTENCE:START */
+#snSec [hidden]{display:none!important}
+#snBarTxt{font-weight:800;margin-bottom:12px}
+.sn-note{font-weight:800;margin:0 0 10px}
+.sn-note:not(:empty){background:#fff4c9;border:3px solid var(--gold);border-radius:14px;padding:8px 12px}
+.sn-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.sn-card{font:inherit;display:flex;align-items:center;gap:10px;text-align:left;background:#fff;border:4px solid var(--ink);border-radius:18px;padding:12px;font-size:1.25rem;font-weight:800;color:var(--ink);cursor:pointer;box-shadow:0 5px 0 var(--ink);position:relative}
+.sn-card:active:not(:disabled){transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
+.sn-card:disabled{opacity:.6;cursor:default}
+.sn-card .sn-n{flex:none;width:34px;height:34px;border-radius:50%;background:#7b5cff;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.sn-card.sn-done::after{content:"⭐";position:absolute;top:-12px;right:-6px;font-size:1.6rem}
+.sn-legend{text-align:center;margin:0 0 6px;font-weight:700}
+.sn-tag{display:inline-block;background:#fff4c9;border:3px solid #e07b00;color:#a14f00;border-radius:10px;padding:0 8px;font-weight:800}
+.sn-stat{text-align:center;font-weight:800;font-size:1.2rem;min-height:30px;margin-bottom:4px}
+.sn-chips{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:10px 0 18px}
+.sn-w{font:inherit;background:#fff;border:4px solid var(--ink);border-radius:20px;padding:12px 14px;font-size:2.2rem;font-weight:800;color:var(--ink);cursor:pointer;box-shadow:0 6px 0 var(--ink);position:relative}
+.sn-w:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink)}
+.sn-w .sn-u{display:inline-block;transition:transform .15s,color .15s;padding:0 1px}
+.sn-w .sn-u.sn-on{color:#ff5a5f;transform:scale(1.35)}
+.sn-w .sn-u.sn-ch{margin-left:.2em}
+.sn-w .sn-p{font-style:normal}
+.sn-w.sn-sight{background:#fff4c9;border-color:#e07b00;box-shadow:0 6px 0 #e07b00;color:#a14f00}
+.sn-w.sn-all .sn-u{color:#12a37f}
+.sn-w.sn-now{background:#ffe8a3}
+.sn-w.sn-ok::after{content:"✅";position:absolute;top:-12px;right:-8px;font-size:1.3rem}
+/* FEATURE:SENTENCE:END */
+/* FEATURE:SNFOCUS:START */
+.sf-howto{background:#fff4c9;border:3px solid var(--gold);border-radius:14px;padding:10px 14px;font-weight:700;line-height:1.4;margin:0 0 12px}
+body.sf-focus header,body.sf-focus nav{display:none!important}
+body.sf-focus #snSec{position:fixed;top:0;left:0;right:0;bottom:0;z-index:50;overflow:auto;background:var(--bg);padding:16px;margin:0;display:flex;flex-direction:column;justify-content:center}
+body.sf-focus #snSec>:not(#snPlayer){display:none!important}
+body.sf-focus #snPlayer{width:100%;padding-top:56px}
+body.sf-focus #snPlayer>.acts:first-child{position:fixed;top:10px;left:10px;z-index:51;margin:0}
+body.sf-focus #snTitle,body.sf-focus #snStat,body.sf-focus .sn-legend{display:none!important}
+body.sf-focus .sn-chips{margin:0 0 22px;gap:18px}
+body.sf-focus .sn-w{font-size:3.4rem;padding:18px 20px}
+body.sf-focus #snActs{position:fixed;bottom:16px;left:0;right:0;z-index:51}
+/* FEATURE:SNFOCUS:END */
+/* FEATURE:SNDOTS:START */
+.dt-dots{display:none}
+body.sf-focus .dt-dots{display:flex;position:fixed;top:18px;right:14px;z-index:51;gap:8px;align-items:center}
+.dt-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);background:#fff;display:inline-block}
+.dt-dot.dt-past{background:#3ddc97}
+.dt-dot.dt-on{background:#ff5a5f;transform:scale(1.3)}
+/* FEATURE:SNDOTS:END */
+/* FEATURE:SCAN:START */
+#scSec [hidden]{display:none!important}
+#scText{width:100%;font:inherit;font-size:1.1rem;padding:10px;border:4px solid var(--ink);border-radius:16px;box-sizing:border-box;margin-bottom:10px;background:#fff;color:var(--ink)}
+#scSec .sc-msg{font-weight:700;padding:10px 14px;border-radius:14px;margin-bottom:10px}
+#scSec .sc-msg:empty{display:none}
+#scSec .sc-note{font-size:.95rem;opacity:.8;margin:0 0 10px}
+#scSec .sc-q{font-size:1.4rem;margin:8px 0 12px}
+#scSec .sc-lv{display:block;width:100%;font-size:1.15rem;padding:18px 12px;margin-bottom:12px;text-align:center}
+#scSec .sc-size{justify-content:flex-end;margin-bottom:8px}
+#scSec .sc-size button{font-size:1.2rem;min-width:56px}
+#scSec #scPage{background:#fffdf6;border:4px solid var(--ink);border-radius:18px;padding:18px 16px;font-family:Verdana,Arial,sans-serif;line-height:1.75;color:#1b1b1b;margin-bottom:12px;min-height:200px}
+#scSec .sc-head{font-size:1.5em;font-weight:900;margin:.4em 0 .3em;color:#2a2360}
+#scSec .sc-para{margin:0 0 .9em}
+#scSec .sc-sent{border-radius:8px;padding:2px 0;transition:background .2s}
+#scSec .sc-sent.sc-on{background:#fff1c2}
+#scSec .sc-w{display:inline-block;cursor:pointer;padding:0 2px;border-radius:6px}
+#scSec .sc-w:active{background:#ffe8a3}
+#scSec .sc-w.sc-now{background:#ffd23f;box-shadow:0 0 0 3px #e07b00}
+/* FEATURE:SCAN:END */
+/* FEATURE:PATH:START */
+#pathSec [hidden]{display:none!important}
+#pathSec .pa-unit{background:#fff;border:4px solid var(--ink);border-radius:18px;padding:12px 14px;margin-bottom:12px}
+#pathSec .pa-unit h3{margin:0 0 4px;font-size:1.3rem}
+#pathSec .pa-status{font-weight:800;margin:6px 0}
+#pathSec .pa-badges{display:flex;flex-wrap:wrap;gap:8px}
+.pa-badge{border:3px solid var(--ink);border-radius:999px;padding:6px 12px;font-weight:800;background:#fff8d6}
+.pa-badge.pa-off{opacity:.35;background:#eee}
+.pa-box{background:#fff;border:4px solid var(--ink);border-radius:18px;padding:14px;margin:12px 0}
+.pa-prompt{font-size:1.2rem;font-weight:800;margin:4px 0 10px}
+.pa-prog{opacity:.75;font-weight:700;margin:0 0 8px}
+.pa-big{font-size:2.6rem;font-weight:900;letter-spacing:.1em;text-align:center;margin:8px 0 12px;font-family:Verdana,Arial,sans-serif}
+.pa-big.pa-sent{font-size:1.5rem;letter-spacing:0;line-height:1.5;font-weight:800}
+.pa-listen{margin-bottom:10px}
+.pa-opts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.pa-opt{font-size:1.4rem;padding:12px 20px;min-width:90px;border:3px solid var(--ink);border-radius:14px;background:#fff;cursor:pointer;font-weight:800}
+.pa-opt.pa-right{background:#b9f5cf}
+.pa-opt.pa-wrong{background:#ffc9c9}
+.pa-fb{font-weight:800;margin:12px 0 4px;text-align:center}
+.pa-next{display:block;margin:12px auto 0}
+#paQuizBtn{font-size:1.2rem;min-width:56px}
+/* FEATURE:PATH:END */
+</style>
+</head>
+<body>
+<header>
+  <svg id="mascot" viewBox="0 0 100 100" aria-label="Mascot">
+    <circle cx="50" cy="52" r="40" fill="#ffd23f" stroke="#2a2150" stroke-width="4"/>
+    <circle cx="22" cy="22" r="10" fill="#ffd23f" stroke="#2a2150" stroke-width="4"/>
+    <circle cx="78" cy="22" r="10" fill="#ffd23f" stroke="#2a2150" stroke-width="4"/>
+    <circle cx="36" cy="44" r="7" fill="#fff" stroke="#2a2150" stroke-width="3"/><circle cx="64" cy="44" r="7" fill="#fff" stroke="#2a2150" stroke-width="3"/>
+    <circle cx="37" cy="45" r="3" fill="#2a2150"/><circle cx="63" cy="45" r="3" fill="#2a2150"/>
+    <circle cx="26" cy="62" r="5" fill="#ff9aa2"/><circle cx="74" cy="62" r="5" fill="#ff9aa2"/>
+    <ellipse id="mouth" cx="50" cy="68" rx="11" ry="8" fill="#a3262a" stroke="#2a2150" stroke-width="3"/>
+  </svg>
+  <div class="hd"><div id="bubble">Hi!</div></div>
+  <div id="stars">⭐ 0</div>
+  <a href="../../index.html#reading" id="skBack" title="Back to Skillyfai" style="flex:none;font-weight:800;font-size:.95rem;color:var(--ink);text-decoration:none;background:#fff4c9;border:3px solid var(--gold);border-radius:14px;padding:6px 10px;white-space:nowrap">&larr; Skillyfai</a>
+</header>
+<nav>
+  <button data-t="s1" class="on">1. Letters</button>
+  <button data-t="s2">2. Blend</button>
+  <!-- FEATURE:SENTENCE:START --><button data-t="snSec">3. Sentence</button><!-- FEATURE:SENTENCE:END --><!-- FEATURE:SCAN:START --><button data-t="scSec">📷 Scan &amp; Read</button><!-- FEATURE:SCAN:END --><!-- FEATURE:PATH:START --><button data-t="pathSec">🏁 My Path</button><!-- FEATURE:PATH:END -->
+  <button data-t="s4">⚙ Tune</button>
+  <button data-t="s5">🎙 Record</button>
+</nav>
+<main>
+  <section id="s1" class="on">
+    <h2>Tap a letter, hear its sound</h2>
+    <p class="hint">Red letters are vowels. First tap on a new letter gives a star.</p>
+    <div class="grid" id="alpha"></div>
+  </section>
+  <section id="s2">
+    <h2>Tap a word, listen and blend</h2>
+    <div class="levels" id="levels"></div>
+    <div id="letterPane">
+    <div class="bar"><i id="fill"></i></div>
+    <div id="barTxt"></div>
+    <div class="acts" style="align-items:center"><button class="go" id="autoBtn">▶ Play all</button><label style="font-weight:800;font-size:1.05rem"><input type="checkbox" id="autoNext" checked style="width:22px;height:22px;vertical-align:middle"> Go to next page automatically</label></div>
+    <div class="words" id="words"></div>
+    <div class="acts" id="pager" style="justify-content:center;align-items:center;margin-top:18px"><button id="prev">⬅ Back</button><b id="pg"></b><button id="next">Next ➡</button></div>
+    </div>
+  </section>
+  <section id="s3">
+    <h2>Drag letters into the box</h2>
+    <p class="hint">Put 2 or more letters together and the blended sound plays.</p>
+    <div id="line"><span class="ph">Drop letters here</span></div>
+    <div class="acts"><button class="go" id="play">🔊 Say it</button><button id="undo">⌫ Back</button><button id="clear">✖ Clear</button></div>
+    <div class="grid" id="tray"></div>
+  </section>
+  <section id="s5">
+    <h2>🎙 Record your own letter sounds</h2>
+    <p class="hint">Tap <b>Record</b>, say the sound (like "buh"), tap <b>Stop</b>. Silence is trimmed and volume is made equal automatically. Recorded sounds are used first; the computer voice is used only for letters not recorded.</p>
+    <div id="recMsg" style="padding:10px 14px;border-radius:14px;font-weight:700;margin-bottom:10px;background:#eef;min-height:44px">Allow the microphone when your browser asks.</div>
+    <div class="acts" style="align-items:center"><b id="recCount" style="font-size:1.2rem"></b><button id="expBtn">⬇ Export all sounds (ZIP)</button><button id="impBtn">⬆ Import sounds (ZIP)</button><button class="go" id="ghBtn">☁ Save to GitHub</button></div>
+    <div style="margin:-4px 0 10px"><a href="#" id="ghCfg" style="font-size:.95rem">GitHub settings</a></div>
+    <div class="acts" style="align-items:center"><label style="font-weight:800">Gap between sounds when blending: <span id="gapTxt"></span><br><input type="range" id="gap" min="0" max="200" step="10" style="width:260px;max-width:80vw"></label><button class="go" id="testBlend">▶ Test blend: s-a-t</button></div>
+    <div class="rgrid" id="rgrid"></div>
+    <h2 style="margin-top:26px">🎙 Blend sounds (clusters)</h2>
+    <p class="hint">Record each one once, like the sound a teacher says (for example "shr" as in shrub). It is reused in every word that starts or ends with it. The whole word at the end is always spoken by the computer voice.</p>
+    <b id="clCount" style="font-size:1.2rem;display:block;margin-bottom:10px"></b>
+    <div class="rgrid" id="cgrid"></div>
+    <h2 style="margin-top:26px">🎙 Special sounds</h2>
+    <p class="hint">Each sound is saved only once. If it is also used somewhere else in the app, recording it here updates it there too.</p>
+    <b id="spCount" style="font-size:1.2rem;display:block;margin-bottom:10px"></b>
+    <div class="rgrid" id="sgrid"></div>
+    <input type="file" id="fileIn" accept="audio/*" hidden><input type="file" id="zipIn" accept=".zip,application/zip" hidden>
+  </section>
+  <section id="s4">
+    <h2>Tune the sounds (teacher)</h2>
+    <p class="hint" id="voiceInfo"></p>
+    <p class="hint">Press ▶ to listen. If a sound is wrong, type another spelling (e.g. <b>fuh</b>, <b>ff</b>, <b>fur</b>) and press ▶ again. Changes are saved on this computer.</p>
+    <div class="acts"><button id="resetSnd">Reset all</button></div>
+    <div id="tune" class="words"></div>
+    <h2 style="margin-top:22px">Blend starts (str, tr, bl ...)</h2>
+    <p class="hint">Used in levels 4 and 5, where the start (like <b>str</b>) is said together, then the ending (like <b>ap</b>), then the whole word.</p>
+    <div id="tuneO" class="words"></div>
+    <h2 style="margin-top:22px">Endings (ip, ub, im ...)</h2>
+    <p class="hint">Sound Lab: tap a small purple spelling under any row to hear it and keep it. Pick the one that sounds right.</p>
+    <div id="tuneR" class="words"></div>
+  </section>
+  <!-- FEATURE:SENTENCE:START -->
+  <section id="snSec">
+    <h2>Read the sentence</h2>
+    <p class="hint">Tap a word: first sound, then the chunk, then the whole word. Sight words are said whole.</p>
+    <div class="levels" id="snLevels"></div>
+    <div id="snNote" class="sn-note"></div>
+    <div class="bar"><i id="snFill"></i></div>
+    <div id="snBarTxt"></div>
+    <div class="acts" style="align-items:center"><button class="go" id="snAuto">▶ Play all</button><label style="font-weight:800;font-size:1.05rem"><input type="checkbox" id="snAutoNext" checked style="width:22px;height:22px;vertical-align:middle"> Go to next sentence automatically</label></div>
+    <div id="snListBox"><div class="sn-list" id="snList"></div></div>
+    <div id="snPlayer" hidden>
+      <div class="acts" style="align-items:center"><button id="snBack" aria-label="Back to sentences">⬅</button><b id="snTitle" style="font-size:1.3rem"></b></div>
+      <div class="sn-legend"><span class="sn-tag">sight word</span> = said whole, not broken into sounds.</div>
+      <div class="sn-stat" id="snStat"></div>
+      <div class="sn-chips" id="snChips"></div>
+      <div class="acts" id="snActs" style="justify-content:center" hidden><button id="snAgain">🔁 Hear it again</button><button class="go" id="snStar">⭐ I read it!</button></div>
+    </div>
+  </section>
+  <!-- FEATURE:SENTENCE:END -->
+<!-- FEATURE:SCAN:START -->
+  <section id="scSec">
+    <h2>📷 Scan &amp; Read: read your own pages</h2>
+    <p class="hint">Paste text, or upload a Word (.docx) or text (.txt) file. Text is split into pages of short sentences. Tap a word to hear it, a 🔊 to hear a sentence, or ▶ to read the whole page.</p>
+    <div id="scLevelBox">
+      <h3 class="sc-q">How would you like me to read?</h3>
+      <button class="go sc-lv" id="scLvBeg">🌱 Beginner: chunks, then words, then sentences</button>
+      <button class="go sc-lv" id="scLvAdv">🚀 Advanced: smooth, fluent sentences</button>
+    </div>
+    <div id="scInputBox">
+      <textarea id="scText" rows="7" placeholder="Paste text from your book here…"></textarea>
+      <div class="acts" style="align-items:center"><button class="go" id="scMake">Make pages</button><button id="scFileBtn">📁 Upload Word or text file</button></div>
+      <div class="acts" style="align-items:center"><button id="scCamBtn">📸 Take a photo</button><button id="scImgBtn">🖼 Choose a photo</button></div>
+      <p class="sc-note">Photos are read on this device. The photo reader loads from the internet the first time you use it.</p>
+      <input type="file" id="scCam" accept="image/*" capture="environment" hidden>
+      <input type="file" id="scImg" accept="image/*" hidden>
+      <input type="file" id="scFile" accept=".docx,.txt,text/plain" hidden>
+    </div>
+    <div id="scMsgBox" class="sc-msg"></div>
+    <div id="scReader" hidden>
+      <div class="acts" style="align-items:center"><button id="scBack">⬅ Edit text</button><button id="scLvChange">🎚 Change level</button><b id="scPg"></b></div>
+      <div class="bar"><i id="scFill"></i></div>
+      <div id="scPage"></div>
+      <div class="acts" style="align-items:center;justify-content:center"><button id="scPrev">⬅ Prev</button><button class="go" id="scPlay">▶ Read page</button><button id="scNext">Next ➡</button></div>
+    </div>
+  </section>
+  <!-- FEATURE:SCAN:END -->
+<!-- FEATURE:PATH:START -->
+  <section id="pathSec">
+    <h2>🏁 My Path</h2>
+    <p class="hint">Story: the friendly mascot has lost its storybook. Each unit helps you find another page of it. Checks give a suggestion and stars. Nothing is saved yet.</p>
+    <div class="acts"><button id="paPlace">🧭 Placement check (optional)</button></div>
+    <div id="paUnits"></div>
+    <div id="paBody"></div>
+    <h3>My badges</h3>
+    <div id="paBadges" class="pa-badges"></div>
+  </section>
+  <!-- FEATURE:PATH:END -->
+</main>
+
+<script>
+// ---- Edit these if a sound seems wrong on your computer's voice ----
+const DEF={a:'ae',b:'ba',c:'ka',d:'da',e:'ee',f:'fa',g:'ga',h:'ha',i:'ee',j:'ja',k:'ka',l:'la',m:'ma',n:'na',o:'or',p:'pa',q:'qu',r:'ra',s:'sa',t:'ta',u:'uh',v:'va',w:'wa',x:'xa',y:'ya',z:'zee'};
+const SOUNDS=Object.assign({},DEF);
+try{Object.assign(SOUNDS,JSON.parse(localStorage.getItem('snd')||'{}'))}catch(e){}
+const PG3=[['bat','cat','mat','fat','hat','rat','sat','ban','can','man','fan','pan','ran','van','dam','ram','ham','jam'],['bad','dad','fad','had','lad','cap','gap','map','rap','sap','tap','bag','gag','rag','tag','wag'],['bin','fin','pin','tin','big','dig','fig','jig','bid','hid','did','kid','lid','rid','bib','fib','nib','rib','bit','fit','kit','lit','pit','sit'],['god','nod','pod','cod','rod','dog','fog','hog','cot','dot','got','hot','lot','pot','not','rot','job','box'],['cub','dub','rub','tub','hub','bug','dug','hug','rug','sun','fun','gun','run','but','cut','hut','nut','mud','bud','pup'],['fed','bed','led','red','wed','den','hen','men','pen','ten','beg','keg','leg','peg','get','pet','let','wet'],['nag','lug'],['zen','sam','sim'],['hop','dim','rig'],['sob','fax','put'],['sip','him'],['pig','top'],['nap'],['pat','yam','six','wax'],['kin']];
+const PG4=[['strap','strip','strut','strum'],['sprig','sprat'],['scrap','scrub','scram'],['splat','split'],['shrub','shrug','shred'],['throb','thrum'],['squid','squat','squab'],['ship','shop','shot','shut','shun','shag','shed','shin'],['chip','chop','chat','chin','chum','chug','chub'],['thin','that','this','then','than','them','thud','thug'],['whip','when','whim','whiz','whop'],['duck','lock','kick','sock','back','neck','pick','rock','buck'],['stop','step','stab','stem','stun'],['blob','bled','blot','blip'],['clap','clip','clop','club','clan'],['flap','flip','flop','flat','fled'],['grab','grid','grin','grip','grub'],['trap','trip','trot','trek','trim'],['snap','snip','snug','snag','snub'],['plan','plot','plum','plus','plod'],['ball','bell','bill','bull','call','fall','fill','full','hall','hill','kill','pull','roll','sell','tell','well','will','yell'],['mess','miss','moss','pass','boss','kiss'],['puff','cuff','muff','huff','buff'],['buzz','fizz','fuzz'],['cart','farm','hard','park','part','star'],['fork','corn','sort','torn','port'],['her','bird','turn','burn','hurt'],['rain','wait','mail','tail','main'],['boat','coat','goat','road','load'],['meat','read','heat','team'],['tree','keep','feel','deep'],['jump','nest','milk','frog','lamp','sand','drum','stamp','crisp','plant','blast','drift','stand']],RULE4=['Rule str-','Rule spr-','Rule scr-','Rule spl-','Rule shr-','Rule thr-','Rule squ-','Rule sh-','Rule ch-','Rule th-','Rule wh-','Rule -ck','Rule st-','Rule bl-','Rule cl-','Rule fl-','Rule gr-','Rule tr-','Rule sn-','Rule pl-','Rule -ll','Rule -ss','Rule -ff','Rule -zz','Rule ar','Rule or','Rule er/ir/ur','Rule ai','Rule oa','Rule ea','Rule ee','Extra practice'];
+const LEVELS={2:['am','an','as','at','be','he','me','we','in','if','is','it','of','on','or','ox','no','go','so','lo','to','do','up','us','by','my','ab','ad','ag','ah','al','ar','aw','ax','ay','eh','el','em','en','er','es','ex','id','ob','od','oh','op','ow','uh','um','un','ut','ba','bi','bo','da','di','fa','fe','ga','gi','ha','hi','ho','ja','jo','ka','ki','la','li','ma','mi','mo','mu','na','ne','nu','pa','pe','pi','po','re','sh','si','ta','te','ti','wo','ya','ye','yo','yu','za','zo','de','bu','du','fo','ku','lu'],3:['bat','cat','mat','fat','hat','rat','sat','ban','can','man','fan','pan','ran','van','dam','ram','ham','jam','bad','dad','fad','had','lad','cap','gap','map','rap','sap','tap','bag','gag','rag','tag','wag','bin','fin','pin','tin','big','dig','fig','jig','bid','hid','did','kid','lid','rid','bib','fib','nib','rib','bit','fit','kit','lit','pit','sit','god','nod','pod','cod','rod','dog','fog','hog','cot','dot','got','hot','lot','pot','not','rot','job','box','cub','dub','rub','tub','hub','bug','dug','hug','rug','sun','fun','gun','run','but','cut','hut','nut','mud','bud','pup','fed','bed','led','red','wed','den','hen','men','pen','ten','beg','keg','leg','peg','get','pet','let','wet','nag','lug','zen','sam','sim','hop','dim','rig','sob','fax','put','sip','him','pig','top','nap','pat','yam','six','wax','kin'],4:['strap','strip','strut','strum','sprig','sprat','scrap','scrub','scram','splat','split','shrub','shrug','shred','throb','thrum','squid','squat','squab','ship','shop','shot','shut','shun','shag','shed','shin','chip','chop','chat','chin','chum','chug','chub','thin','that','this','then','than','them','thud','thug','whip','when','whim','whiz','whop','duck','lock','kick','sock','back','neck','pick','rock','buck','stop','step','stab','stem','stun','blob','bled','blot','blip','clap','clip','clop','club','clan','flap','flip','flop','flat','fled','grab','grid','grin','grip','grub','trap','trip','trot','trek','trim','snap','snip','snug','snag','snub','plan','plot','plum','plus','plod','ball','bell','bill','bull','call','fall','fill','full','hall','hill','kill','pull','roll','sell','tell','well','will','yell','mess','miss','moss','pass','boss','kiss','puff','cuff','muff','huff','buff','buzz','fizz','fuzz','cart','farm','hard','park','part','star','fork','corn','sort','torn','port','her','bird','turn','burn','hurt','rain','wait','mail','tail','main','boat','coat','goat','road','load','meat','read','heat','team','tree','keep','feel','deep','jump','nest','milk','frog','lamp','sand','drum','stamp','crisp','plant','blast','drift','stand']};
+
+// "4 letters" (up to 4), "5 letters" and "6 or more letters": the same lesson pages as before, split by word length.
+// To change the 6+ words, edit PG6 (each [ ... ] is one page).
+const PG6=[['strand','strict','struck'],['sprint','sprang'],['splint','splash'],['shrimp','shrink'],['thrash','thrust','threat'],['scrunch','crunch'],['stamps','plants','blasts','drifts']];
+const PGL={4:[],5:[],6:PG6};
+PG4.forEach(pg=>{const a=pg.filter(x=>x.length<=4),b=pg.filter(x=>x.length===5),c=pg.filter(x=>x.length>=6);if(a.length)PGL[4].push(a);if(b.length)PGL[5].push(b);if(c.length)PGL[6].push(c)});
+[4,5,6].forEach(k=>{LEVELS[k]=[...new Set(PGL[k].flat())]});
+function pages(l){if(l==3)return PG3;if(l>=4)return PGL[l];const a=LEVELS[l],r=[];for(let i=0;i<a.length;i+=9)r.push(a.slice(i,i+9));return r}
+const UNIT={sh:'shh',ch:'cha',th:'tha',wh:'wa',ck:'ka',ll:'la',ss:'sa',ff:'fa',zz:'za',ar:'ar',or:'or',er:'er',ir:'er',ur:'er',ai:'ay',oa:'oh',ea:'ee',ee:'ee',qu:'kwa'};
+function units(w){const r=[];for(let i=0;i<w.length;){const d=w.substr(i,2);if(UNIT[d]){r.push(d);i+=2}else r.push(w[i++])}return r}
+const snd=u=>u.length>1?UNIT[u]:SOUNDS[u];
+const L='abcdefghijklmnopqrstuvwxyz'.split(''),V='aeiou';
+const $=s=>document.querySelector(s);
+let stars=0,voice=null,tok=0,level=2,page=0,done=new Set(),heard=new Set(),free=[];
+const color=c=>V.includes(c)?'#ff5a5f':`hsl(${(L.indexOf(c)*47)%360 + 170},62%,42%)`;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function pickVoice(){const v=speechSynthesis.getVoices();const lg=x=>x.lang.replace('_','-');voice=v.find(x=>lg(x)==='en-IN')||v.find(x=>lg(x)==='en-GB')||v.find(x=>x.lang.startsWith('en'))||null;const vi=document.getElementById('voiceInfo');if(vi)vi.textContent=voice?'Voice in use: '+voice.name+' ('+voice.lang+')':'No English voice found'}
+if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
+function say(t,rate){return new Promise(res=>{
+  $('#bubble').textContent=t;document.body.classList.add('talk');
+  if(!('speechSynthesis' in window)){setTimeout(()=>{document.body.classList.remove('talk');res()},500);return}
+  const u=new SpeechSynthesisUtterance(t);u.lang=voice?voice.lang:'en-IN';if(voice)u.voice=voice;u.rate=rate||.7;u.pitch=1.2;u.volume=1;
+  let d=0;const f=()=>{if(!d){d=1;document.body.classList.remove('talk');res()}};
+  u.onstart=()=>console.log('[speech] started:',t);u.onend=f;u.onerror=e=>{console.warn('[speech] error:',e&&e.error,t);f()};setTimeout(f,3500);speechSynthesis.speak(u)})}
+function stop(){tok++;stopAudio();if('speechSynthesis' in window)speechSynthesis.cancel()}
+const ONS0={sh:'sha',ch:'cha',th:'tha',wh:'wa',str:'stra',spr:'spra',scr:'skra',spl:'spla',shr:'shra',thr:'thra',squ:'skwa',st:'sta',bl:'bla',cl:'kla',fl:'fla',gr:'gra',tr:'tra',sn:'sna',pl:'pla',cr:'kra',dr:'dra',fr:'fra',br:'bra',pr:'pra',gl:'gla',sl:'sla',sm:'sma',sw:'swa',sk:'ska',sp:'spa'};
+const ONSET=Object.assign({},ONS0);
+try{Object.assign(ONSET,JSON.parse(localStorage.getItem('ons')||'{}'))}catch(e){}
+function rimeSay(r){return r.length==2&&!'aeiou'.includes(r[1])?r+r[1]:r}
+function steps(word,chunk){
+  const U=units(word);
+  if(chunk){
+    const vi=U.findIndex(u=>'aeiou'.includes(u[0]));
+    if(vi>=0){
+      const on=U.slice(0,vi),rime=U.slice(vi),out=[];
+      if(on.length==1)out.push({t:snd(on[0]),idx:[0]});
+      else if(on.length>1){const k=on.join('');
+        if(ONSET[k])out.push({t:ONSET[k],idx:on.map((_,x)=>x)});
+        else on.forEach((u,x)=>out.push({t:snd(u),idx:[x]}))}
+      out.push({t:rimeSay(rime.join('')),idx:rime.map((_,x)=>vi+x)});
+      return out}}
+  return U.map((u,x)=>({t:snd(u),idx:[x]}))}
+async function blendTTS(word,hl,chunk){
+  stop();const me=tok;await sleep(60);
+  for(const st of steps(word,chunk)){if(me!==tok)return false;hl&&hl(st.idx);await say(st.t,.55);await sleep(150)}
+  if(me!==tok)return false;hl&&hl(-2);await speakWord(word);hl&&hl(-1);return me===tok}
+function star(n,el){
+  stars+=n;$('#stars').textContent='⭐ '+stars;
+  const r=(el||$('#stars')).getBoundingClientRect(),f=document.createElement('div');
+  f.className='fly';f.textContent='⭐';f.style.left=r.left+r.width/2-14+'px';f.style.top=r.top+'px';
+  document.body.appendChild(f);setTimeout(()=>f.remove(),900)}
+function sparks(el){
+  const r=el.getBoundingClientRect();
+  for(let i=0;i<10;i++){const s=document.createElement('div'),a=i*36*Math.PI/180;
+    s.className='spark';s.style.background=['#ffb703','#ff5a5f','#3ddc97','#7b5cff'][i%4];
+    s.style.left=r.left+r.width/2+'px';s.style.top=r.top+r.height/2+'px';
+    s.style.setProperty('--x',Math.cos(a)*50+'px');s.style.setProperty('--y',Math.sin(a)*50+'px');
+    document.body.appendChild(s);setTimeout(()=>s.remove(),500)}}
+
+// tabs
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  auto++;setAuto(false);stop();document.body.classList.remove('talk');
+  document.querySelectorAll('nav button,section').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');$('#'+b.dataset.t).classList.add('on')});
+
+// Section 1
+function mkTile(c,withCap){
+  const b=document.createElement('button');b.className='tile';b.style.background=color(c);
+  b.innerHTML=withCap?c.toUpperCase()+'<small>'+c+'</small>':c;b.setAttribute('aria-label','letter '+c);return b}
+L.forEach(c=>{const b=mkTile(c,true);
+  b.onclick=async()=>{b.classList.add('hit');setTimeout(()=>b.classList.remove('hit'),200);
+    if(!heard.has(c)){heard.add(c);star(1,b)}stop();await sayLetter(c)};
+  $('#alpha').appendChild(b)});
+
+// Section 2
+function renderLevels(){
+  $('#levels').innerHTML='';
+  Object.keys(LEVELS).forEach(n=>{const b=document.createElement('button');
+    const all=LEVELS[n].every(w=>done.has(w));
+    b.textContent=(n==6?'6 or more letters':n+' letters')+(all?' ✅':'');if(+n===level)b.className='on';
+    b.onclick=()=>{auto++;setAuto(false);stop();level=+n;page=0;renderLevels();renderWords()};$('#levels').appendChild(b)})}
+function progress(){
+  const w=LEVELS[level],n=w.filter(x=>done.has(x)).length;
+  $('#fill').style.width=n/w.length*100+'%';
+  $('#barTxt').textContent=(level==6?'6 or more letters':level+' letters')+': '+n+' of '+w.length+' words done';}
+function renderWords(){
+  const box=$('#words');box.innerHTML='';
+  pages(level)[page].forEach(w=>{
+    const b=document.createElement('button');b.className='word'+(done.has(w)?' done':'');
+    b.innerHTML=units(w).map(c=>'<span>'+c+'</span>').join('');
+    b.onclick=()=>{auto++;setAuto(false);playBtn(b,w)};
+    box.appendChild(b)});progress();renderPager()}
+async function playBtn(b,w){
+  const sp=b.querySelectorAll('span');
+  document.querySelectorAll('.word').forEach(x=>x.classList.remove('all'));
+  const ok=await blend(w,i=>{sp.forEach((s,k)=>s.classList.toggle('on',Array.isArray(i)&&i.includes(k)));b.classList.toggle('all',i===-2)},level>=4);
+  sp.forEach(s=>s.classList.remove('on'));
+  if(ok&&!done.has(w)){done.add(w);b.classList.add('done');star(2,b);sparks(b);progress();renderLevels();renderPager()}
+  return ok}
+let auto=0;
+function setAuto(on){const a=$('#autoBtn');a.textContent=on?'⏹ Stop':'▶ Play all';a.style.background=on?'#ff5a5f':'#3ddc97';a.style.color=on?'#fff':''}
+async function autoPlay(){
+  const me=++auto;setAuto(true);
+  while(me===auto){
+    for(const b of [...document.querySelectorAll('.word')]){
+      const ok=await playBtn(b,b.textContent);
+      if(!ok||me!==auto){if(me===auto)setAuto(false);return}
+      await sleep(700)}
+    if(!$('#autoNext').checked||page>=pages(level).length-1)break;
+    page++;renderWords();window.scrollTo(0,0);await sleep(900)}
+  if(me===auto)setAuto(false)}
+$('#autoBtn').onclick=()=>{if($('#autoBtn').textContent.startsWith('⏹')){auto++;stop();document.body.classList.remove('talk');setAuto(false)}else autoPlay()};
+function renderPager(){const n=pages(level).length,ok=pages(level)[page].every(x=>done.has(x));
+  $('#pager').style.display=n>1?'flex':'none';$('#pg').textContent='Page '+(page+1)+' of '+n+(ok?' ✅ Page complete!':'');
+  $('#prev').disabled=page===0;$('#next').disabled=page>=n-1;$('#next').style.background=ok&&page<n-1?'#3ddc97':'#fff'}
+function go(d){auto++;setAuto(false);stop();page+=d;renderWords();window.scrollTo(0,0)}
+$('#prev').onclick=()=>go(-1);$('#next').onclick=()=>go(1);
+renderLevels();renderWords();
+
+// Section 3
+const line=$('#line');
+function renderLine(pop){
+  line.innerHTML='';line.classList.toggle('joined',free.length>1);
+  if(!free.length){line.innerHTML='<span class="ph">Drop letters here</span>';return}
+  free.forEach((c,i)=>{const s=document.createElement('span');s.className='l'+(pop&&i===free.length-1?' pop':'');
+    s.textContent=c;s.style.color=color(c);line.appendChild(s)});
+  if(pop)sparks(line.lastChild)}
+function addLetter(c){
+  if(free.length>=8)return;free.push(c);renderLine(true);
+  if(free.length>1){blend(free.join(''));star(1,line)}else{stop();sayLetter(c)}}
+L.forEach(c=>{
+  const b=mkTile(c,false);let ghost=null,sx=0,sy=0,moved=false;
+  const mv=e=>{ghost.style.left=e.clientX-37+'px';ghost.style.top=e.clientY-37+'px';
+    const r=line.getBoundingClientRect();
+    line.classList.toggle('over',e.clientX>r.left&&e.clientX<r.right&&e.clientY>r.top&&e.clientY<r.bottom)};
+  b.onpointerdown=e=>{e.preventDefault();sx=e.clientX;sy=e.clientY;moved=false;
+    ghost=b.cloneNode(true);ghost.classList.add('ghost');document.body.appendChild(ghost);mv(e);b.setPointerCapture(e.pointerId)};
+  b.onpointermove=e=>{if(!ghost)return;if(Math.abs(e.clientX-sx)+Math.abs(e.clientY-sy)>8)moved=true;mv(e)};
+  b.onpointerup=e=>{if(!ghost)return;
+    const r=line.getBoundingClientRect(),inside=e.clientX>r.left&&e.clientX<r.right&&e.clientY>r.top&&e.clientY<r.bottom;
+    ghost.remove();ghost=null;line.classList.remove('over');
+    if(inside||!moved)addLetter(c)};
+  b.onpointercancel=()=>{if(ghost){ghost.remove();ghost=null}};
+  $('#tray').appendChild(b)});
+$('#play').onclick=()=>{if(free.length>1)blend(free.join(''));else if(free.length)sayLetter(free[0])};
+$('#undo').onclick=()=>{stop();free.pop();renderLine(false)};
+$('#clear').onclick=()=>{stop();free=[];renderLine(false)};
+// Tune
+L.forEach(c=>{const r=document.createElement('div');r.className='row';
+  r.innerHTML='<b style="color:'+color(c)+'">'+c+'</b><input value="'+SOUNDS[c]+'" aria-label="sound for '+c+'"><button>▶</button>';
+  const inp=r.querySelector('input');
+  inp.oninput=()=>{SOUNDS[c]=inp.value.trim()||DEF[c];try{localStorage.setItem('snd',JSON.stringify(SOUNDS))}catch(e){}};
+  r.querySelector('button').onclick=()=>{stop();say(SOUNDS[c],.6)};
+  $('#tune').appendChild(r)});
+Object.keys(ONS0).forEach(k=>{const r=document.createElement('div');r.className='row';
+  r.innerHTML='<b style="width:70px;font-size:1.4rem">'+k+'</b><input value="'+ONSET[k]+'" aria-label="start sound '+k+'"><button>▶</button>';
+  const inp=r.querySelector('input');
+  inp.oninput=()=>{ONSET[k]=inp.value.trim()||ONS0[k];try{localStorage.setItem('ons',JSON.stringify(ONSET))}catch(e){}};
+  r.querySelector('button').onclick=()=>{stop();say(ONSET[k],.6)};
+  $('#tuneO').appendChild(r)});
+$('#resetSnd').onclick=()=>{Object.assign(ONSET,ONS0);try{localStorage.removeItem('ons')}catch(e){}
+  document.querySelectorAll('#tuneO input').forEach((x,i)=>x.value=ONS0[Object.keys(ONS0)[i]]);Object.assign(SOUNDS,DEF);try{localStorage.removeItem('snd')}catch(e){}
+  document.querySelectorAll('#tune input').forEach((x,i)=>x.value=DEF[L[i]])};
+if('speechSynthesis' in window)pickVoice();
+// ================= Recorded sounds (real voice) =================
+// BLEND SOUNDS to record. 'CLUSTERS_MANUAL' is your own editable list (add or remove names any time).
+// The app also adds, by itself, every start cluster (like 'str') and every ending (like 'at', 'amp') used by the words in the 3 letters and 4 or more letters levels.
+// Each one is recorded once and reused automatically in every word that starts or ends with it.
+const CLUSTERS_MANUAL=['str','spr','spl','shr','thr','sh','ch','th','ub','ip','im','st','cl','fl','gr','tr','pl','us'];
+const CLUSTERS=(()=>{
+  const on=new Set(),ri=new Set();
+  Object.keys(LEVELS).forEach(n=>LEVELS[n].forEach(w=>{
+    if(+n===3){if(!'aeiou'.includes(w[0]))ri.add(w.slice(1));return}
+    if(+n<4)return;
+    const U=units(w),vi=U.findIndex(u=>'aeiou'.includes(u[0]));if(vi<0)return;
+    const o=U.slice(0,vi).join(''),r=U.slice(vi).join('');
+    if(o.length>1)on.add(o);if(r.length>1)ri.add(r)}));
+  const srt=a=>[...a].sort((x,y)=>x.length-y.length||(x<y?-1:1));
+  return[...new Set([...CLUSTERS_MANUAL,...srt(on),...srt(ri)])]})();
+// Special sounds section (in this order). Same recording is shared with the same sound anywhere else in the app.
+const SPECIAL=['m','ag','ib','ut','ud','am','ix','at','ob','squ','sh','class','pl'];
+var AC=window.AudioContext||window.webkitAudioContext,ctx=null,bufs={},src={},playing=[],rec=null,gapMs=70,upLetter=null;
+try{gapMs=+(localStorage.getItem('gap')||70)}catch(e){}
+const getCtx=()=>ctx||(ctx=new AC());
+// RECORDING_VOLUME: make this bigger for louder recordings (1 = original level). A limiter stops distortion.
+const RECORDING_VOLUME=2;
+var outNode=null;
+function masterOut(){if(outNode)return outNode;const c=getCtx(),g=c.createGain(),k=c.createDynamicsCompressor();
+  g.gain.value=RECORDING_VOLUME;k.threshold.value=-8;k.knee.value=0;k.ratio.value=20;k.attack.value=.002;k.release.value=.12;
+  g.connect(k);k.connect(c.destination);return outNode=g}
+['pointerdown','touchend','click'].forEach(ev=>document.addEventListener(ev,()=>{try{getCtx().resume()}catch(e){}},{passive:true}));
+const decode=ab=>new Promise((res,rej)=>{const p=getCtx().decodeAudioData(ab,res,rej);if(p&&p.catch)p.catch(rej)});
+// ---- IndexedDB ----
+let dbp;
+function idb(){return dbp||(dbp=new Promise((res,rej)=>{const r=indexedDB.open('phonics-sounds',1);r.onupgradeneeded=()=>r.result.createObjectStore('s',{keyPath:'letter'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}))}
+async function idbDo(mode,fn){const d=await idb();return new Promise((res,rej)=>{const t=d.transaction('s',mode);const r=fn(t.objectStore('s'));t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej(t.error)})}
+const idbAll=()=>idbDo('readonly',s=>s.getAll()),idbPut=(letter,wav)=>idbDo('readwrite',s=>s.put({letter,wav})),idbDel=l=>idbDo('readwrite',s=>s.delete(l));
+// ---- trim + normalise + WAV ----
+function processBuf(b){
+  const n=b.length,ch=b.numberOfChannels,sr=b.sampleRate,x=new Float32Array(n);
+  for(let c=0;c<ch;c++){const d=b.getChannelData(c);for(let i=0;i<n;i++)x[i]+=d[i]/ch}
+  let pk=0;for(let i=0;i<n;i++){const a=Math.abs(x[i]);if(a>pk)pk=a}
+  if(pk<0.003)return null;
+  const th=pk*0.06;let s=0,e=n-1;while(s<n&&Math.abs(x[s])<th)s++;while(e>s&&Math.abs(x[e])<th)e--;
+  s=Math.max(0,s-Math.round(sr*.02));e=Math.min(n-1,e+Math.round(sr*.04));
+  let y=x.slice(s,e+1);const mx=Math.round(sr*1.2);if(y.length>mx)y=y.slice(0,mx);
+  let p2=0,sum=0;for(let i=0;i<y.length;i++){const a=Math.abs(y[i]);if(a>p2)p2=a;sum+=y[i]*y[i]}
+  const rms=Math.sqrt(sum/y.length)||1e-6,g=Math.min(.95/p2,.15/rms),fi=Math.round(sr*.008),fo=Math.round(sr*.02);
+  for(let i=0;i<y.length;i++){let k=g;if(i<fi)k*=i/fi;if(y.length-i<fo)k*=(y.length-i)/fo;y[i]*=k}
+  return{data:y,sr}}
+function toWav(y,sr){const n=y.length,ab=new ArrayBuffer(44+n*2),v=new DataView(ab);
+  const w=(o,t)=>{for(let i=0;i<t.length;i++)v.setUint8(o+i,t.charCodeAt(i))};
+  w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++)v.setInt16(44+i*2,Math.max(-1,Math.min(1,y[i]))*32767,true);return ab}
+// ---- playback (Web Audio, exact timing) ----
+function stopAudio(){playing.forEach(s=>{try{s.stop()}catch(e){}});playing=[]}
+function playSeq(letters,gap){
+  const c=getCtx();c.resume();let t=c.currentTime+.04,last=null;const t0=t;
+  letters.forEach(l=>{const s=c.createBufferSource();s.buffer=bufs[l];s.connect(masterOut());s.start(t);t+=s.buffer.duration+gap/1000;playing.push(s);last=s});
+  document.body.classList.add('talk');
+  return new Promise(r=>{const f=()=>{document.body.classList.remove('talk');r()};last.onended=f;setTimeout(f,(t-t0)*1000+400)})}
+async function sayLetter(c){if(bufs[c]){$('#bubble').textContent=c;await playSeq([c],0)}else await say(SOUNDS[c],.6)}
+const UL={ll:['l'],ss:['s'],ff:['f'],zz:['z'],ck:['k'],qu:['k','w']};
+function recPlan(word,chunk){
+  const U=units(word),L2=U.map(u=>u.length==1?[u]:UL[u]);
+  if(L2.some(x=>!x||x.some(l=>!bufs[l])))return null;
+  let groups=null;
+  if(chunk){const vi=U.findIndex(u=>'aeiou'.includes(u[0]));
+    if(vi>=0){groups=[];if(vi>0)groups.push({idx:U.slice(0,vi).map((_,i)=>i)});groups.push({idx:U.slice(vi).map((_,i)=>vi+i)})}}
+  if(!groups)groups=U.map((_,i)=>({idx:[i]}));
+  groups.forEach(g=>g.letters=g.idx.flatMap(i=>L2[i]));
+  return{groups,all:L2.flat()}}
+// FINAL STEP: speaks the whole word as TEXT with the SpeechSynthesis API (no audio clips are joined here)
+function speakWord(word,rate){
+  if(!('speechSynthesis' in window)){console.warn('[blend] SpeechSynthesis not supported in this browser');return Promise.resolve()}
+  if(!voice)pickVoice();
+  console.log('[blend] FINAL STEP -> speechSynthesis.speak("'+word+'") | voice:',voice?voice.name+' ('+voice.lang+')':'browser default');
+  try{speechSynthesis.resume()}catch(e){}
+  return say(word,rate||.7)}
+// 3-letter words: onset (your recorded letter) -> rime (last two letters, spoken by text-to-speech as ONE sound)
+const RIMES={at:'at',an:'an',am:'am',ad:'add',ap:'app',ag:'agg',ax:'ax',in:'in',ig:'igg',id:'id',ib:'ibb',it:'it',og:'ogg',ot:'ot',ob:'obb',od:'odd',ox:'ox',ub:'ubb',ug:'ugg',un:'un',ut:'utt',ud:'udd',up:'up',ed:'ed',en:'en',eg:'egg',et:'et'};
+function speakRime(rime){
+  const t=RIMES[rime]||rimeSay(rime);           // always lower-case, sent as ONE word (never letter by letter)
+  console.log('[blend] rime cluster "'+rime+'" -> speechSynthesis.speak("'+t+'")');
+  try{speechSynthesis.resume()}catch(e){}
+  return say(t,.6)}
+async function blendOnsetRime(word,hl){
+  stop();const me=tok;await sleep(80);
+  const onset=word[0],rime=word.slice(1);
+  hl&&hl([0]);await playSeq([onset],0);await sleep(150);   // 1. onset = your recorded sound (C)
+  if(me!==tok)return false;
+  hl&&hl([1,2]);if(bufs[rime])await playSeq([rime],0);else await speakRime(rime);await sleep(350);     // 2. rime = text-to-speech, ONE clip (AT)
+  if(me!==tok)return false;
+  hl&&hl(-2);await speakWord(word);                         // 3. whole word = text-to-speech (BAT)
+  hl&&hl(-1);return me===tok}
+async function blend(word,hl,chunk){
+  if(chunk)return blendLong(word,hl);
+  if(!chunk&&word.length===3&&bufs[word[0]]&&!'aeiou'.includes(word[0]))return blendOnsetRime(word,hl);
+  const p=chunk?null:recPlan(word,chunk);if(!p)return blendTTS(word,hl,chunk);
+  stop();const me=tok;await sleep(80);
+  for(const g of p.groups){if(me!==tok)return false;hl&&hl(g.idx);await playSeq(g.letters,gapMs);await sleep(350)}
+  if(me!==tok)return false;await sleep(250);if(me!==tok)return false;hl&&hl(-2);await speakWord(word);hl&&hl(-1);return me===tok}
+// ---- load saved sounds ----
+async function loadRepo(l){if(!location.protocol.startsWith('http'))return;
+  for(const nm of(l.length===1?[l,l.toUpperCase()]:[l]))for(const ext of['wav','mp3']){try{const r=await fetch('sounds/'+nm+'.'+ext);if(r.ok){bufs[l]=await decode(await r.arrayBuffer());src[l]='repo';return}}catch(e){}}}
+async function initAudio(){
+  try{await Promise.all((await idbAll()).map(async r=>{try{bufs[r.letter]=await decode(r.wav.slice(0));src[r.letter]='rec';updateCard(r.letter)}catch(e){}}))}catch(e){msg('Saving on this device is not available in this browser mode (private mode?). Sounds will not be kept.',1)}
+  const todo=L.concat(CLUSTERS,SPECIAL).filter(l=>!bufs[l]);
+  for(let i=0;i<todo.length;i+=8)await Promise.all(todo.slice(i,i+8).map(async l=>{await loadRepo(l);updateCard(l)}))}
+// ---- record screen ----
+function msg(t,bad){const m=$('#recMsg');m.textContent=t;m.style.background=bad?'#ffe3e3':'#e6fff3'}
+function updateCard(l){
+  document.querySelectorAll('.rc[data-k="'+l+'"]').forEach(c=>{const on=rec&&rec.letter===l,has=!!bufs[l];
+    c.className='rc'+(on?' rec':has?' ok':'');
+    c.querySelector('.st').textContent=on?'🔴 Recording…':has?(src[l]==='repo'?'📁 From /sounds':'✅ Recorded · '+bufs[l].duration.toFixed(2)+'s'):'○ Not recorded';
+    c.querySelector('.rr').textContent=on?'⏹ Stop':has?'🎙 Re-record':'🎙 Record';
+    c.querySelector('.rp').disabled=!has;c.querySelector('.rd').disabled=src[l]!=='rec'});
+  const n=a=>a.filter(x=>bufs[x]).length,BL=CLUSTERS.filter(x=>!SPECIAL.includes(x));
+  $('#recCount').textContent=n(L)+' of 26 ready';
+  const cc=$('#clCount');if(cc)cc.textContent=n(BL)+' of '+BL.length+' blend sounds ready';
+  const sc=$('#spCount');if(sc)sc.textContent=n(SPECIAL)+' of '+SPECIAL.length+' ready'}
+async function saveRaw(l,ab,quiet){
+  try{const b=await decode(ab),p=processBuf(b);
+    if(!p){if(!quiet)msg('That recording was silent. Please try again, closer to the microphone.',1);return false}
+    await idbPut(l,toWav(p.data,p.sr));
+    const nb=getCtx().createBuffer(1,p.data.length,p.sr);nb.copyToChannel(p.data,0);bufs[l]=nb;src[l]='rec';updateCard(l);
+    if(!quiet){msg(l.toUpperCase()+' saved ✅ ('+nb.duration.toFixed(2)+' seconds)');playSeq([l],0)}return true}
+  catch(e){if(!quiet)msg('Could not read that audio. Please try again or use another file.',1);return false}}
+async function stopRec(){
+  if(!rec)return;const r=rec;rec=null;clearTimeout(r.timer);
+  if(r.mr.state!=='inactive'){try{r.mr.stop()}catch(e){}await Promise.race([r.done,sleep(1500)])}
+  r.stream.getTracks().forEach(t=>t.stop());updateCard(r.letter);
+  await saveRaw(r.letter,await new Blob(r.chunks,{type:r.mr.mimeType||'audio/mp4'}).arrayBuffer())}
+async function toggleRec(l){
+  if(rec){const same=rec.letter===l;await stopRec();if(same)return}
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){msg('Recording does not work here. On a phone, open this page with https:// (for example GitHub Pages) in Chrome or Safari. You can also use the 📁 upload button.',1);return}
+  let stream;
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}
+  catch(e){msg(e.name==='NotFoundError'?'No microphone was found on this device.':'The microphone is blocked. Please allow microphone access for this page in your browser settings (tap the lock or settings icon near the web address), then try again.',1);return}
+  const mt=['audio/webm;codecs=opus','audio/webm','audio/mp4;codecs=mp4a.40.2','audio/mp4','audio/aac','audio/ogg;codecs=opus'].find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t));
+  const mr=mt?new MediaRecorder(stream,{mimeType:mt}):new MediaRecorder(stream),chunks=[];
+  mr.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+  rec={letter:l,mr,stream,chunks,done:new Promise(r=>mr.onstop=r)};
+  mr.start();rec.timer=setTimeout(stopRec,3500);updateCard(l);msg('Recording '+l.toUpperCase()+'… say the sound now, then tap Stop.')}
+function mkCard(l,grid){
+  const c=document.createElement('div');c.dataset.k=l;c.className='rc';
+  c.innerHTML='<div class="rl" style="color:'+color(l)+'">'+(l.length>1?l:l.toUpperCase()+' <small>'+l+'</small>')+'</div><div class="st"></div><div class="rb"><button class="rr big"></button><button class="rp" aria-label="Play">▶</button><button class="ru" aria-label="Upload file">📁</button><button class="rd" aria-label="Delete">🗑</button></div>';
+  c.querySelector('.rr').onclick=()=>toggleRec(l);
+  c.querySelector('.rp').onclick=()=>{stop();if(bufs[l])playSeq([l],0)};
+  c.querySelector('.ru').onclick=()=>{upLetter=l;$('#fileIn').value='';$('#fileIn').click()};
+  c.querySelector('.rd').onclick=async()=>{if(!confirm('Delete the recording for '+l.toUpperCase()+'?'))return;
+    try{await idbDel(l)}catch(e){}delete bufs[l];delete src[l];await loadRepo(l);updateCard(l);msg(l.toUpperCase()+' deleted.')};
+  grid.appendChild(c)}
+function buildRec(){
+  L.forEach(l=>mkCard(l,$('#rgrid')));
+  CLUSTERS.filter(x=>!SPECIAL.includes(x)).forEach(l=>mkCard(l,$('#cgrid')));
+  SPECIAL.forEach(l=>mkCard(l,$('#sgrid')));   // each sound has ONE card and ONE saved recording
+  L.concat(CLUSTERS,SPECIAL).forEach(updateCard)}
+$('#fileIn').onchange=async e=>{const f=e.target.files[0];if(f&&upLetter){msg('Reading file…');await saveRaw(upLetter,await f.arrayBuffer())}};
+$('#gap').value=gapMs;$('#gapTxt').textContent=gapMs+' ms';
+$('#gap').oninput=e=>{gapMs=+e.target.value;$('#gapTxt').textContent=gapMs+' ms';try{localStorage.setItem('gap',gapMs)}catch(x){}};
+$('#testBlend').onclick=()=>{stop();const w='sat'.split('');if(w.every(x=>bufs[x]))playSeq(w,gapMs);else msg('Record S, A and T first to test blending.',1)};
+// ---- ZIP export / import (no library) ----
+const CRCT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+const crc32=u=>{let c=~0;for(let i=0;i<u.length;i++)c=CRCT[(c^u[i])&255]^(c>>>8);return ~c>>>0};
+function makeZip(files){const enc=new TextEncoder(),parts=[],cd=[];let off=0;
+  files.forEach(f=>{const nm=enc.encode(f.name),crc=crc32(f.data),h=new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(12,33,true);h.setUint32(14,crc,true);h.setUint32(18,f.data.length,true);h.setUint32(22,f.data.length,true);h.setUint16(26,nm.length,true);
+    const c=new DataView(new ArrayBuffer(46));
+    c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(14,33,true);c.setUint32(16,crc,true);c.setUint32(20,f.data.length,true);c.setUint32(24,f.data.length,true);c.setUint16(28,nm.length,true);c.setUint32(42,off,true);
+    parts.push(new Uint8Array(h.buffer),nm,f.data);cd.push(new Uint8Array(c.buffer),nm);off+=30+nm.length+f.data.length});
+  const cdSize=cd.reduce((a,b)=>a+b.length,0),e=new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cdSize,true);e.setUint32(16,off,true);
+  return new Blob([...parts,...cd,new Uint8Array(e.buffer)],{type:'application/zip'})}
+async function inflate(u8){const r=new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate-raw')));return new Uint8Array(await r.arrayBuffer())}
+async function readZip(ab){const u=new Uint8Array(ab),v=new DataView(ab),out=[];let e=u.length-22;
+  while(e>=0&&v.getUint32(e,true)!==0x06054b50)e--;if(e<0)throw new Error('Not a ZIP file');
+  const cnt=v.getUint16(e+10,true);let p=v.getUint32(e+16,true);
+  for(let i=0;i<cnt;i++){const method=v.getUint16(p+10,true),cs=v.getUint32(p+20,true),nl=v.getUint16(p+28,true),el=v.getUint16(p+30,true),cl=v.getUint16(p+32,true),lo=v.getUint32(p+42,true);
+    const name=new TextDecoder().decode(u.slice(p+46,p+46+nl));p+=46+nl+el+cl;
+    const ds=lo+30+v.getUint16(lo+26,true)+v.getUint16(lo+28,true);let data=u.slice(ds,ds+cs);
+    if(method===8){if(typeof DecompressionStream==='undefined'){out.push({name,skip:1});continue}data=await inflate(data)}
+    else if(method!==0){out.push({name,skip:1});continue}
+    out.push({name,data})}
+  return out}
+$('#expBtn').onclick=async()=>{
+  try{const all=await idbAll();if(!all.length){msg('Nothing to export yet. Record some sounds first.',1);return}
+    const z=makeZip(all.sort((a,b)=>a.letter<b.letter?-1:1).map(r=>({name:r.letter+'.wav',data:new Uint8Array(r.wav)})));
+    const a=document.createElement('a');a.href=URL.createObjectURL(z);a.download='phonics-sounds.zip';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);
+    msg('Exported '+all.length+' sounds as phonics-sounds.zip ✅')}catch(e){msg('Export failed. Please try again.',1)}};
+$('#impBtn').onclick=()=>{$('#zipIn').value='';$('#zipIn').click()};
+$('#zipIn').onchange=async e=>{const f=e.target.files[0];if(!f)return;msg('Importing…');
+  try{const files=await readZip(await f.arrayBuffer());let ok=0,skip=0;
+    for(const z of files){const m=z.name.split('/').pop().toLowerCase().match(/^([a-z]{1,8})\.(wav|mp3|m4a|ogg|webm|aac|mp4)$/);
+      if(!m||!(L.includes(m[1])||CLUSTERS.includes(m[1])||SPECIAL.includes(m[1])))continue;if(z.skip){skip++;continue}
+      if(await saveRaw(m[1],z.data.buffer.slice(z.data.byteOffset,z.data.byteOffset+z.data.byteLength),true))ok++}
+    msg('Imported '+ok+' sounds ✅'+(skip?' ('+skip+' could not be read in this browser)':''),!ok)}
+  catch(err){msg('Could not read that ZIP file.',1)}};
+buildRec();initAudio();
+// ================= LONG WORDS (4+ letters): onset -> rime -> whole word =================
+// EASY TO EDIT:  1) ONS0 (above) = how each start cluster is spoken (str, scr, spl, sh, st, cl ...)
+//                2) RIME_SAY (below) = how each ending is spoken. Key = spelling, value = what the voice should read.
+const RIME_SAY={ip:'ihp',ub:'uhb',im:'ihm',us:'uss',ab:'abb',ad:'add',ag:'agg',ap:'app',ib:'ibb',id:'idd',ig:'igg',in:'inn',ob:'obb',od:'odd',og:'ogg',op:'opp',ot:'ott',ud:'udd',ug:'ugg',um:'umm',un:'unn',up:'upp',ut:'utt',ed:'edd',eg:'egg',em:'emm',en:'enn',et:'ett',it:'itt',is:'iss',at:'att',am:'amm',an:'ann'};
+const rimeFix=r=>RIME_SAY[r]||rimeSay(r);
+const LONG_RATE=.8,LONG_PAUSE=150;
+async function blendLong(word,hl){
+  const U=units(word),vi=U.findIndex(u=>'aeiou'.includes(u[0]));
+  if(vi<0)return blendTTS(word,hl,false);
+  const on=U.slice(0,vi),rime=U.slice(vi),list=[];
+  if(on.length){const ok=on.join('');
+    if(bufs[ok])list.push({rec:ok,idx:on.map((_,i)=>i)});                                    // a) your recording of this letter / cluster
+    else list.push({t:ONSET[ok]||on.map(snd).join(' '),idx:on.map((_,i)=>i)})}              // b) respelled text-to-speech
+  const rk=rime.join('');
+  list.push(bufs[rk]?{rec:rk,idx:rime.map((_,i)=>vi+i)}:{t:rimeFix(rk),idx:rime.map((_,i)=>vi+i)});
+  if(bufs[word])list.splice(0,list.length,{rec:word,idx:U.map((_,i)=>i)});   // a recording of the whole sound (like 'class') is used first
+  stop();const me=tok;await sleep(80);
+  for(const st of list){
+    if(me!==tok)return false;hl&&hl(st.idx);
+    if(st.rec)await playSeq([st.rec],0);
+    else{console.log('[long] unit -> speak("'+st.t+'")');try{speechSynthesis.resume()}catch(e){}await say(st.t,LONG_RATE)}
+    await sleep(LONG_PAUSE)}
+  if(me!==tok)return false;
+  hl&&hl(-2);await speakWord(word,LONG_RATE);hl&&hl(-1);return me===tok}
+// ===== Sound Lab (Tune tab): tap a chip to hear a spelling and keep it =====
+const RIME0=Object.assign({},RIME_SAY);
+try{Object.assign(RIME_SAY,JSON.parse(localStorage.getItem('rims')||'{}'))}catch(e){}
+const saveOns=()=>{try{localStorage.setItem('ons',JSON.stringify(ONSET))}catch(e){}},saveRims=()=>{try{localStorage.setItem('rims',JSON.stringify(RIME_SAY))}catch(e){}};
+function addChips(row,list,inp,set){
+  const d=document.createElement('div');d.style.cssText='width:100%;display:flex;gap:6px;flex-wrap:wrap';
+  list.forEach(v=>{const c=document.createElement('button');c.textContent=v;
+    c.style.cssText='font-size:1rem;padding:6px 10px;background:#e8e4ff;border:2px solid #7b5cff;border-radius:10px';
+    c.onclick=()=>{inp.value=v;set(v);stop();say(v,LONG_RATE)};d.appendChild(c)});
+  row.appendChild(d)}
+const ONS_TRY={sh:['sha','shh','shhh','sheh','shah'],ch:['cha','cheh','chuh','chah','chh'],th:['tha','thah','theh','thuh']};
+document.querySelectorAll('#tuneO .row').forEach(r=>{
+  const k=r.querySelector('b').textContent,inp=r.querySelector('input');r.style.flexWrap='wrap';
+  addChips(r,ONS_TRY[k]||['a','ah','uh','eh','ih'].map(e=>k+e),inp,v=>{ONSET[k]=v;saveOns()})});
+Object.keys(RIME_SAY).forEach(k=>{
+  const r=document.createElement('div');r.className='row';r.style.flexWrap='wrap';
+  r.innerHTML='<b style="width:70px;font-size:1.4rem">'+k+'</b><input value="'+RIME_SAY[k]+'" aria-label="ending sound '+k+'"><button>▶</button>';
+  const inp=r.querySelector('input'),set=v=>{RIME_SAY[k]=v||RIME0[k];saveRims()};
+  inp.oninput=()=>set(inp.value.trim());
+  r.querySelector('button').onclick=()=>{stop();say(RIME_SAY[k],LONG_RATE)};
+  if(k.length===2&&'aeiou'.includes(k[0]))addChips(r,[k+k[1],k[0]+'h'+k[1],k,k+'h'],inp,set);
+  $('#tuneR').appendChild(r)});
+$('#resetSnd').addEventListener('click',()=>{Object.assign(RIME_SAY,RIME0);try{localStorage.removeItem('rims')}catch(e){}
+  document.querySelectorAll('#tuneR input').forEach((x,i)=>x.value=RIME0[Object.keys(RIME0)[i]])});
+// ================= Save to GitHub (one click) =================
+// Saves every recorded sound as sounds/<name>.wav in your repository (a.wav, b.wav, shr.wav ...), the same names the app loads from.
+function b64(ab){const u=new Uint8Array(ab);let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s)}
+async function gitSha(ab){
+  if(!(window.crypto&&crypto.subtle))return'';
+  const u=new Uint8Array(ab),h=new TextEncoder().encode('blob '+u.length+'\0'),b=new Uint8Array(h.length+u.length);b.set(h);b.set(u,h.length);
+  return[...new Uint8Array(await crypto.subtle.digest('SHA-1',b))].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function ghConf(force){
+  let c=null;try{c=JSON.parse(localStorage.getItem('gh')||'null')}catch(e){}
+  if(c&&c.token&&!force)return c;
+  const host=location.hostname.split('.')[0],seg=location.pathname.split('/')[1]||'';
+  const guess=(c&&c.repo)||(location.hostname.endsWith('github.io')?host+'/'+(seg&&!seg.includes('.')?seg:host+'.github.io'):'');
+  const repo=prompt('Your GitHub repository (owner/name), for example myname/phonics:',guess);if(!repo)return null;
+  const branch=prompt('Branch name (usually main):',(c&&c.branch)||'main');if(!branch)return null;
+  const token=prompt('Paste your GitHub token. It needs "Contents: Read and write" for this repository only. It is kept on this device.',(c&&c.token)||'');if(!token)return null;
+  c={repo:repo.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/$/,''),branch:branch.trim(),token:token.trim()};
+  try{localStorage.setItem('gh',JSON.stringify(c))}catch(e){}return c}
+async function ghSave(){
+  const c=ghConf(false);if(!c){msg('Save to GitHub was cancelled.',1);return}
+  const H={Authorization:'Bearer '+c.token,Accept:'application/vnd.github+json'},base='https://api.github.com/repos/'+c.repo+'/contents/apps/sound-friends/';
+  const btn=$('#ghBtn');btn.disabled=true;
+  const bad=s=>{if(s===401){try{const g=JSON.parse(localStorage.getItem('gh'));g.token='';localStorage.setItem('gh',JSON.stringify(g))}catch(e){}return'GitHub did not accept the token. Tap Save to GitHub again and paste a new token.'}
+    if(s===403)return'GitHub says this token is not allowed to write here (or too many requests). Check the token has "Contents: Read and write" for this repository.';
+    if(s===404)return'GitHub could not find the repository or branch, or the token has no access to it. Check "GitHub settings".';
+    return'GitHub error '+s+'. Please try again.'};
+  try{
+    const all=await idbAll();if(!all.length){msg('Nothing recorded yet, so there is nothing to save.',1);return}
+    msg('Checking your GitHub sounds folder…');
+    const ex={},r=await fetch(base+'sounds?ref='+encodeURIComponent(c.branch),{headers:H});
+    if(r.ok)(await r.json()).forEach(f=>{ex[f.name.toLowerCase()]=f});
+    else if(r.status!==404){msg(bad(r.status),1);return}
+    let saved=0,same=0,i=0;
+    for(const rec of all.sort((a,b)=>a.letter<b.letter?-1:1)){
+      i++;msg('Saving to GitHub… '+i+' of '+all.length+' ('+rec.letter+')');
+      const e=ex[rec.letter+'.wav'],name=e?e.name:rec.letter+'.wav',sha=await gitSha(rec.wav);
+      if(e&&sha&&sha===e.sha){same++;continue}
+      const put=async s=>fetch(base+'sounds/'+name,{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},H),
+        body:JSON.stringify({message:'Update sound '+rec.letter,content:b64(rec.wav),branch:c.branch,sha:s||undefined})});
+      let res=await put(e&&e.sha);
+      if(res.status===409||res.status===422){const g=await fetch(base+'sounds/'+name+'?ref='+encodeURIComponent(c.branch),{headers:H});
+        res=await put(g.ok?(await g.json()).sha:undefined)}
+      if(!res.ok){msg(bad(res.status)+' ('+saved+' saved before the problem)',1);return}
+      saved++}
+    msg('Saved to GitHub ✅  '+saved+' uploaded'+(same?', '+same+' already up to date':'')+'. The website can take a minute or two to show the new sounds.')}
+  catch(err){msg('Could not reach GitHub. Check your internet connection and try again.',1)}
+  finally{btn.disabled=false}}
+$('#ghBtn').onclick=ghSave;
+$('#ghCfg').onclick=e=>{e.preventDefault();if(ghConf(true))msg('GitHub settings saved. Tap Save to GitHub when you are ready.')};
+// FEATURE:SENTENCE:START  (Sentence tab. Step 1: Preliminary stage with Play all)
+(function(){try{
+// ===================== EDIT HERE =====================
+// SIGHT WORDS: the repeating words of sentences. They are NEVER broken into sounds, they are said whole.
+// Add or remove words (lower case). Every other word is blended: first sound, then the chunk, then the whole word.
+const SN_SIGHT=[
+  'a','an','the','i','is','am','are','was','were','be','been',
+  'he','she','we','me','my','you','your','they','them','their','then','this','that','these','those','there','here',
+  'his','her','him','it','its',
+  'to','too','two','of','for','from','with','into','in','on','at','up','as','by','or','so','no','go','do','does',
+  'and','said','says','have','has','what','when','where','who','why','how',
+  'one','some','any','many','all','could','would','should','because','again','come','want','put'
+];
+// The 30 sentences: ['sentence text', 'picture emoji for the meaning check']. Write them as normal text.
+const SN_DATA={
+  pre:[['The cat sat.','🐱'],['A pig can run.','🐷'],['My dog is big.','🐶'],['He got a bug.','🐛'],['Sun is hot.','☀️'],['Dad had a van.','🚐'],['Sam hid a pen.','✏️'],['Chip had a nap.','😴'],['Frog can hop.','🐸'],['I can clap.','👏']],
+  int:[['The rabbit hopped under the blanket.','🐰'],['A tiny puppy sat on the carpet.','🐶'],['The children played happily in the garden.','🧒'],['Please fetch the bucket from the kitchen.','🪣'],['My sister had a picnic by the lake.','👧'],['The tractor drove across the muddy field.','🚜'],['Mother planted a bright red tomato.','🍅'],['The magic lantern lit the dark hallway.','🏮'],['Dinner is ready, so wash your hands.','🧼'],['Grandpa told a funny story about the farm.','👴']],
+  adv:[['Wow, look at the big rainbow in the sky!','🌈','wonder'],['The little puppy lost his red ball and cried.','🐶','sorrow'],['We won the race, hurray, we did it!','🏆','joy'],['Can you believe how bright the stars are tonight?','⭐','wonder'],['The old tree fell in the storm, and Dad looked sad.','🌳','sorrow'],['Splash! The happy frog jumped into the cool pond.','🐸','joy'],['Mum baked a sweet cake for my birthday!','🎂','joy'],['Why did the baby bird fall from the nest?','🐦','wonder'],['The sea was calm, and the moon looked so big.','🌊','wonder'],['I miss my friend who moved to the town.','🏠','sorrow']]
+};
+// Advanced expression: how the voice sounds for each mood (speed and pitch). 'plain' = normal reading.
+const SN_MOOD={joy:{rate:.95,pitch:1.6},wonder:{rate:.7,pitch:1.4},sorrow:{rate:.65,pitch:.9},plain:{rate:.8,pitch:1.2}};
+// ===================== END EDIT =====================
+const KEYS=['pre','int','adv'],NAMES={pre:'Preliminary',int:'Intermediate',adv:'Advanced'};
+const G=id=>document.getElementById(id),sec=G('snSec');
+if(!sec)return;
+const sight=new Set(SN_SIGHT);
+let lv='pre',cur=-1,T=[],tapped=new Set(),run=0,sauto=0,prog={pre:[],int:[],adv:[]};
+try{const p=JSON.parse(localStorage.getItem('sn_progress')||'null');
+  if(p)KEYS.forEach(k=>{if(Array.isArray(p[k]))prog[k]=p[k].filter(n=>Number.isInteger(n)&&n>=0&&n<SN_DATA[k].length)})}catch(e){}
+const save=()=>{try{localStorage.setItem('sn_progress',JSON.stringify(prog))}catch(e){}};
+const isDone=(k,i)=>prog[k].includes(i);
+const open=()=>sec.classList.contains('on');
+const setStat=t=>{G('snStat').textContent=t};
+const setAutoUI=on=>{const a=G('snAuto');a.textContent=on?'⏹ Stop':'▶ Play all';a.style.background=on?'#ff5a5f':'#3ddc97';a.style.color=on?'#fff':''};
+const haltAuto=()=>{sauto++;setAutoUI(false)};
+function progress(){const n=prog[lv].length,t=SN_DATA[lv].length;
+  G('snFill').style.width=n/t*100+'%';G('snBarTxt').textContent=NAMES[lv]+': '+n+' of '+t+' sentences done'}
+// Own speech helper (same voice as the rest of the app) for reading the whole sentence in one go.
+function snSpeak(text,rate,pitch){return new Promise(res=>{
+  if(!('speechSynthesis' in window)){setTimeout(res,600);return}
+  try{speechSynthesis.resume()}catch(e){}
+  const v=(typeof voice!=='undefined')?voice:null,u=new SpeechSynthesisUtterance(text);
+  u.lang=v?v.lang:'en-IN';if(v)u.voice=v;u.rate=rate||.8;u.pitch=pitch||1.2;u.volume=1;
+  G('bubble').textContent=text;document.body.classList.add('talk');
+  let d=0;const f=()=>{if(!d){d=1;document.body.classList.remove('talk');res()}};
+  u.onend=f;u.onerror=f;setTimeout(f,Math.max(4000,text.length*350));
+  speechSynthesis.speak(u)})}
+function renderLevels(){
+  const box=G('snLevels');box.innerHTML='';
+  KEYS.forEach(k=>{const b=document.createElement('button'),all=SN_DATA[k].every((_,i)=>isDone(k,i));
+    b.textContent=NAMES[k]+(all?' ✅':'');if(k===lv)b.className='on';
+    b.onclick=()=>{haltAuto();run++;stop();lv=k;showList()};box.appendChild(b)})}
+function showList(){
+  cur=-1;run++;
+  G('snPlayer').hidden=true;G('snListBox').hidden=false;renderLevels();progress();
+  G('snAuto').disabled=false;
+  G('snNote').textContent='';
+  const box=G('snList');box.innerHTML='';
+  SN_DATA[lv].forEach((s,i)=>{const b=document.createElement('button');
+    b.className='sn-card'+(isDone(lv,i)?' sn-done':'');
+    b.innerHTML='<span class="sn-n">'+(i+1)+'</span><span></span>';b.lastChild.textContent=s[0];
+    b.onclick=()=>{haltAuto();openSentence(i)};
+    box.appendChild(b)})}
+function openSentence(i){
+  run++;stop();cur=i;tapped=new Set();
+  T=SN_DATA[lv][i][0].split(/\s+/).filter(Boolean).map(t=>({raw:t,core:t.replace(/[^A-Za-z']/g,'').toLowerCase()})).filter(t=>t.core);
+  T.forEach(t=>{t.sight=sight.has(t.core)||lv==='adv'});
+  G('snListBox').hidden=true;G('snPlayer').hidden=false;G('snActs').hidden=true;
+  G('snTitle').textContent='Sentence '+(i+1);setStat('Tap each word, one by one.');
+  const box=G('snChips');box.innerHTML='';
+  T.forEach((t,k)=>{const b=document.createElement('button');b.className='sn-w'+(t.sight&&lv!=='adv'?' sn-sight':'');
+    b.setAttribute('aria-label','word '+t.core);
+    const m=t.raw.match(/^([^A-Za-z']*)([A-Za-z']+)([^A-Za-z']*)$/),lead=m?m[1]:'',word=m?m[2]:t.core,tail=m?m[3]:'';
+    let inner;
+    if(t.sight)inner='<span class="sn-u">'+word+'</span>';                       // sight word: one piece, said whole
+    else{const U=units(t.core),vi=U.findIndex(u=>'aeiou'.includes(u[0]));      // start sound(s) | chunk from the first vowel
+      if(/^[A-Z]/.test(word))U[0]=U[0].charAt(0).toUpperCase()+U[0].slice(1);
+      inner=U.map((u,x)=>'<span class="sn-u'+(vi>0&&x===vi?' sn-ch':'')+'">'+u+'</span>').join('')}
+    b.innerHTML=(lead?'<i class="sn-p">'+lead+'</i>':'')+inner+(tail?'<i class="sn-p">'+tail+'</i>':'');
+    b.onclick=()=>tapWord(k);box.appendChild(b)});
+  window.scrollTo(0,0)}
+function clearMarks(){document.querySelectorAll('#snChips .sn-w').forEach(c=>{c.classList.remove('sn-all','sn-now');c.querySelectorAll('.sn-u').forEach(s=>s.classList.remove('sn-on'))})}
+// Says ONE word. Sight word = whole. Any other word = the same long-word technique as the 6+ letters level:
+// first sound(s), then the chunk (from the first vowel), then the whole word. Returns true when it finished.
+async function sayWord(k){
+  const t=T[k],b=G('snChips').children[k];clearMarks();let ok=true;
+  if(t.sight){setStat(lv==='adv'?'Say the whole word.':'Sight word: say it whole.');b.classList.add('sn-all');stop();const m=tok;await speakWord(t.core);ok=(m===tok)}
+  else{setStat('First sound, then the chunk, then the word.');const sp=b.querySelectorAll('.sn-u');
+    ok=await blend(t.core,i=>{sp.forEach((s,x)=>s.classList.toggle('sn-on',Array.isArray(i)&&i.includes(x)));b.classList.toggle('sn-all',i===-2)},true)}
+  clearMarks();return ok!==false}
+async function tapWord(k){
+  haltAuto();const me=++run,alive=()=>me===run&&open();
+  try{
+    const ok=await sayWord(k);
+    if(!ok||!alive())return;
+    const before=tapped.size;tapped.add(k);G('snChips').children[k].classList.add('sn-ok');
+    if(before<T.length&&tapped.size===T.length){await sleep(500);if(alive())await joinSentence(alive)}
+    else setStat('Tap each word, one by one.')
+  }catch(err){console.error('[sentence] word failed',err)}}
+// All words joined: slow with gaps, faster, then once naturally. Returns true when it finished.
+async function joinSentence(alive){
+  try{
+    const chips=[...G('snChips').children];G('snActs').hidden=true;
+    const passes=lv==='adv'?[]:[{msg:'Now say it slowly…',rate:.6,gap:700},{msg:'Faster…',rate:.8,gap:250}];
+    for(const p of passes){
+      setStat(p.msg);
+      for(let k=0;k<T.length;k++){
+        if(!alive())return false;
+        chips.forEach((c,x)=>c.classList.toggle('sn-now',x===k));
+        await speakWord(T[k].core,p.rate);
+        if(!alive())return false;
+        await sleep(p.gap)}
+      chips.forEach(c=>c.classList.remove('sn-now'));await sleep(500)}
+    if(!alive())return false;
+    setStat('Now like talking!');chips.forEach(c=>c.classList.add('sn-all'));
+    const txt=T.map(t=>t.raw).join(' ');
+    if(lv==='adv')await snSpeak(txt,SN_MOOD.plain.rate);
+    else await snSpeak(txt,.85);
+    chips.forEach(c=>c.classList.remove('sn-all'));
+    if(!alive())return false;
+    setStat('Now read it aloud, then tap the star!');G('snActs').hidden=false;return true
+  }catch(err){console.error('[sentence] join failed',err);return false}}
+// PLAY ALL (same idea as the Blend tab): plays every word, then the three replays, then the next sentence.
+async function playSentence(alive){
+  for(let k=0;k<T.length;k++){
+    if(!alive())return false;
+    const ok=await sayWord(k);
+    if(!ok||!alive())return false;
+    tapped.add(k);G('snChips').children[k].classList.add('sn-ok');await sleep(450)}
+  return joinSentence(alive)}
+async function autoRun(){
+  const me=++sauto,alive=()=>me===sauto&&open();setAutoUI(true);
+  let i=cur>=0?cur:0;
+  try{
+    while(alive()){
+      openSentence(i);
+      const ok=await playSentence(alive);
+      if(!ok||!alive())break;
+      await sleep(2500);                                   // time for the child to read it aloud
+      if(!alive()||!G('snAutoNext').checked||i>=SN_DATA[lv].length-1)break;
+      i++}
+  }catch(err){console.error('[sentence] play all failed',err)}
+  if(me===sauto)setAutoUI(false)}
+G('snAuto').onclick=()=>{
+  if(G('snAuto').textContent.startsWith('⏹')){haltAuto();run++;stop();document.body.classList.remove('talk')}
+  else autoRun()};
+G('snBack').onclick=()=>{haltAuto();run++;stop();showList()};
+G('snAgain').onclick=()=>{haltAuto();const me=++run;stop();joinSentence(()=>me===run&&open())};
+G('snStar').onclick=()=>{
+  if(cur<0)return;haltAuto();const b=G('snStar');
+  if(!isDone(lv,cur)){prog[lv].push(cur);save();star(2,b);sparks(b)}
+  run++;stop();showList()};
+// when the child leaves this tab, cancel anything still running and return to the list
+new MutationObserver(()=>{if(!open()){haltAuto();run++;if(cur>=0)showList()}}).observe(sec,{attributes:true,attributeFilter:['class']});
+showList();
+}catch(err){console.error('[sentence] could not start:',err)}})();
+// FEATURE:SENTENCE:END
+// FEATURE:SNFOCUS:START  (Sentence tab: how-to note on the first page, and a full-screen view with only the sentence while reading)
+(function(){try{
+const sfSec=document.getElementById('snSec'),sfPlayer=document.getElementById('snPlayer'),sfLv=document.getElementById('snLevels');
+if(!sfSec||!sfPlayer||!sfLv)return;
+const sfNote=document.createElement('div');sfNote.id='sf-howto';sfNote.className='sf-howto';
+sfNote.textContent='How to use: tap each word, one by one. Each word is said by its sounds, then as a whole. Sight words are said whole at once. When all words are done, the full sentence is read. Then tap ⭐ I read it!';
+sfLv.parentNode.insertBefore(sfNote,sfLv);
+const sfSync=()=>{const reading=sfSec.classList.contains('on')&&!sfPlayer.hidden;
+  document.body.classList.toggle('sf-focus',reading);
+  sfNote.hidden=reading||!sfSec.classList.contains('on')};
+new MutationObserver(sfSync).observe(sfSec,{attributes:true,attributeFilter:['class']});
+new MutationObserver(sfSync).observe(sfPlayer,{attributes:true,attributeFilter:['hidden']});
+sfSync();
+}catch(err){console.error('[sentence focus] could not start:',err)}})();
+// FEATURE:SNFOCUS:END
+// FEATURE:SNDOTS:START  (Sentence tab: one dot per sentence in the full-screen view, the current one highlighted)
+(function(){try{
+const dtPlayer=document.getElementById('snPlayer'),dtTitle=document.getElementById('snTitle'),dtList=document.getElementById('snList');
+if(!dtPlayer||!dtTitle||!dtList)return;
+const dtBox=document.createElement('div');dtBox.id='dt-dots';dtBox.className='dt-dots';dtBox.setAttribute('aria-hidden','true');
+dtPlayer.appendChild(dtBox);
+const dtDraw=()=>{
+  const total=dtList.children.length,m=/(\d+)/.exec(dtTitle.textContent||''),cur=m?+m[1]-1:-1;
+  dtBox.innerHTML='';
+  if(!total||cur<0)return;
+  for(let i=0;i<total;i++){const d=document.createElement('span');d.className='dt-dot'+(i===cur?' dt-on':i<cur?' dt-past':'');dtBox.appendChild(d)}
+};
+new MutationObserver(dtDraw).observe(dtTitle,{childList:true,characterData:true,subtree:true});
+new MutationObserver(dtDraw).observe(dtList,{childList:true});
+dtDraw();
+}catch(err){console.error('[sentence dots] could not start:',err)}})();
+// FEATURE:SNDOTS:END
+// FEATURE:SCAN:START  (Scan & Read tab: paste, upload or photograph text; shown as book-style pages with word-by-word highlight. Nothing is saved.)
+(function(){try{
+const G=id=>document.getElementById(id);
+const scSec=G('scSec');
+if(!scSec)return;
+const PAGE_CHARS=420;   // about 8-10 lines on a phone
+let pages=[],pi=0,run=0,playing=false,scLevel='beginner',sz=1.7,cur=[];
+const scMsg=(t,bad)=>{const m=G('scMsgBox');m.textContent=t||'';m.style.background=bad?'#ffe3e3':'#e6fff3'};
+const setPlayUI=on=>{playing=on;G('scPlay').textContent=on?'⏹ Stop':'▶ Read page'};
+function clearMarks(){document.querySelectorAll('#scPage .sc-now').forEach(w=>w.classList.remove('sc-now'));document.querySelectorAll('#scPage .sc-on').forEach(s=>s.classList.remove('sc-on'))}
+function halt(){run++;stop();setPlayUI(false);clearMarks()}
+function markWord(rec,i){document.querySelectorAll('#scPage .sc-now').forEach(w=>w.classList.remove('sc-now'));if(rec&&rec.words[i])rec.words[i].classList.add('sc-now')}
+function markSent(rec){document.querySelectorAll('#scPage .sc-on').forEach(s=>s.classList.remove('sc-on'));rec.el.classList.add('sc-on');try{rec.el.scrollIntoView({block:'center',behavior:'smooth'})}catch(e){}}
+
+// ---- text -> headings and paragraphs -> sentences -> pages ----
+const sentencesOf=t=>(t.match(/[^.!?]+[.!?]+["')\]]*|[^.!?]+$/g)||[]).map(s=>s.trim()).filter(Boolean);
+function buildUnits(raw){
+  const units=[];let buf=[];
+  const flush=()=>{if(!buf.length)return;const sents=sentencesOf(buf.join(' ').replace(/\s+/g,' '));buf=[];let g=[],n=0;
+    sents.forEach(s=>{if(g.length&&n+s.length>PAGE_CHARS){units.push({head:false,sents:g});g=[];n=0}g.push(s);n+=s.length});
+    if(g.length)units.push({head:false,sents:g})};
+  raw.replace(/\r/g,'').replace(/-\n(?=[a-z])/g,'').split('\n').forEach(line=>{
+    const l=line.trim();
+    if(!l){flush();return}
+    if(!buf.length&&l.length<=60&&!/[.!?:;,"')\]]$/.test(l)){units.push({head:true,sents:[l]});return}
+    buf.push(l)});
+  flush();return units}
+function packPages(units){const out=[];let c=[],n=0;
+  units.forEach(u=>{const len=u.sents.join(' ').length;if(c.length&&n+len>PAGE_CHARS){out.push(c);c=[];n=0}c.push(u);n+=len});
+  if(c.length)out.push(c);return out}
+function renderPage(){
+  const box=G('scPage');box.innerHTML='';box.style.fontSize=sz+'rem';cur=[];
+  (pages[pi]||[]).forEach(u=>{
+    const el=document.createElement(u.head?'h3':'p');el.className=u.head?'sc-head':'sc-para';
+    u.sents.forEach((s,i)=>{
+      const sp=document.createElement('span');sp.className='sc-sent';
+      const rec={text:s,words:[],el:sp};
+      s.split(/\s+/).forEach((w,j)=>{
+        if(j)sp.appendChild(document.createTextNode(' '));
+        const ws=document.createElement('span');ws.className='sc-w';ws.textContent=w;
+        ws.onclick=ev=>{ev.stopPropagation();const c=w.replace(/[^A-Za-z']/g,'').toLowerCase();if(!c)return;halt();scSpeak(c,.7)};
+        sp.appendChild(ws);rec.words.push(ws)});
+      sp.onclick=()=>{halt();const me=++run;(scLevel==='beginner'?sayBeginner:sayAdvanced)(rec,me)};
+      cur.push(rec);el.appendChild(sp);
+      if(i<u.sents.length-1)el.appendChild(document.createTextNode(' '))});
+    box.appendChild(el)});
+  G('scPg').textContent='Page '+(pi+1)+' of '+pages.length;
+  G('scFill').style.width=(pages.length?(pi+1)/pages.length*100:0)+'%';
+  G('scPrev').disabled=pi<=0;G('scNext').disabled=pi>=pages.length-1;
+  setPlayUI(false)}
+
+// ---- speech with word-by-word timing (uses the device's word events; falls back to an estimate) ----
+function scSpeak(t,rate,onWord){return new Promise(res=>{
+  if(!('speechSynthesis' in window)){setTimeout(res,600);return}
+  try{speechSynthesis.resume()}catch(e){}
+  const u=new SpeechSynthesisUtterance(t);u.lang=voice?voice.lang:'en-IN';if(voice)u.voice=voice;
+  u.rate=rate||.8;u.pitch=1.2;u.volume=1;
+  const starts=[];const re=/\S+/g;let m;while((m=re.exec(t)))starts.push(m.index);
+  const mark=i=>{if(onWord&&i>=0&&i<starts.length)onWord(i)};
+  let done=0,heard=false,timer=null,fb=0;
+  const f=()=>{if(!done){done=1;clearInterval(timer);res()}};
+  u.onboundary=ev=>{if(ev.name&&ev.name!=='word')return;heard=true;let idx=0;starts.forEach((s,x)=>{if(s<=ev.charIndex)idx=x});mark(idx)};
+  timer=setInterval(()=>{if(heard){clearInterval(timer);return}mark(fb);fb++;if(fb>=starts.length)clearInterval(timer)},Math.max(250,420/(u.rate||1)));
+  u.onend=f;u.onerror=f;setTimeout(f,Math.max(4000,t.length*350));
+  speechSynthesis.speak(u)})}
+
+// ---- reading: Beginner = chunks of each word, then the sentence; Advanced = the sentence, smoothly ----
+async function sayBeginner(rec,me){
+  markSent(rec);
+  const ws=rec.text.split(/\s+/);
+  for(let j=0;j<rec.words.length;j++){
+    if(me!==run)return false;
+    markWord(rec,j);
+    const w=ws[j].replace(/[^A-Za-z']/g,'').toLowerCase();
+    if(w){const ok=await blend(w,null,true);if(ok===false||me!==run)return false}
+    await sleep(120)}
+  if(me!==run)return false;
+  markWord(rec,-1);
+  await scSpeak(rec.text,.75,i=>{if(me===run)markWord(rec,i)});
+  markWord(rec,-1);
+  return me===run}
+async function sayAdvanced(rec,me){
+  markSent(rec);
+  await scSpeak(rec.text,.85,i=>{if(me===run)markWord(rec,i)});
+  markWord(rec,-1);
+  return me===run}
+async function readPage(){
+  halt();const me=++run;setPlayUI(true);await sleep(60);
+  for(const rec of cur){
+    if(me!==run)break;
+    const ok=scLevel==='beginner'?await sayBeginner(rec,me):await sayAdvanced(rec,me);
+    if(!ok||me!==run)break;
+    await sleep(250)}
+  if(me===run){clearMarks();setPlayUI(false)}}
+
+// ---- level: asked every time the tab opens ----
+function showLevel(){halt();G('scLevelBox').hidden=false;G('scInputBox').hidden=true;G('scReader').hidden=true;scMsg('')}
+function chooseLevel(lv){scLevel=lv;G('scLevelBox').hidden=true;G('scInputBox').hidden=false;G('scReader').hidden=true;scMsg('')}
+G('scLvBeg').onclick=()=>chooseLevel('beginner');
+G('scLvAdv').onclick=()=>chooseLevel('advanced');
+G('scLvChange').onclick=()=>showLevel();
+
+// ---- text size buttons above the page ----
+const sizeRow=document.createElement('div');sizeRow.className='acts sc-size';
+sizeRow.innerHTML='<button id="scSmaller">A−</button><button id="scBigger">A+</button>';
+G('scPage').parentNode.insertBefore(sizeRow,G('scPage'));
+G('scSmaller').onclick=()=>{sz=Math.max(1.1,+(sz-.2).toFixed(1));G('scPage').style.fontSize=sz+'rem'};
+G('scBigger').onclick=()=>{sz=Math.min(3,+(sz+.2).toFixed(1));G('scPage').style.fontSize=sz+'rem'};
+
+// ---- buttons: make pages, move between pages, read, edit text ----
+G('scMake').onclick=()=>{halt();const units=buildUnits(G('scText').value);
+  if(!units.length){scMsg('Paste some text or upload a file first.',1);return}
+  pages=packPages(units);pi=0;G('scInputBox').hidden=true;G('scReader').hidden=false;renderPage();scMsg('');window.scrollTo(0,0)};
+G('scBack').onclick=()=>{halt();G('scReader').hidden=true;G('scInputBox').hidden=false;scMsg('')};
+G('scPrev').onclick=()=>{halt();pi--;renderPage();window.scrollTo(0,0)};
+G('scNext').onclick=()=>{halt();pi++;renderPage();window.scrollTo(0,0)};
+G('scPlay').onclick=()=>{if(playing)halt();else readPage()};
+
+// ---- files: Word (.docx) and text (.txt) ----
+G('scFileBtn').onclick=()=>{G('scFile').value='';G('scFile').click()};
+G('scFile').onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;scMsg('Reading file…');
+  try{
+    let text='';
+    if(/\.docx$/i.test(f.name)){
+      const files=await readZip(await f.arrayBuffer());
+      const doc=files.find(z=>z.name==='word/document.xml');
+      if(!doc||!doc.data)throw new Error('no document');
+      const xml=new DOMParser().parseFromString(new TextDecoder().decode(doc.data),'text/xml');
+      text=[...xml.getElementsByTagName('w:p')].map(p=>[...p.getElementsByTagName('w:t')].map(t=>t.textContent).join('')).join('\n\n')}
+    else if(/\.txt$/i.test(f.name)||/^text\//.test(f.type))text=await f.text();
+    else{scMsg('This file type is not supported yet. Use Word (.docx) or text (.txt), or paste the text.',1);return}
+    G('scText').value=text;
+    scMsg(text.trim()?'File loaded. Tap Make pages.':'The file has no text in it.',!text.trim())
+  }catch(err){scMsg('Could not read that file. Try pasting the text instead.',1)}};
+
+// ---- photos: text in a photo is read on this device (Tesseract.js, loaded once, only when a photo is chosen) ----
+const TESS_URL='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+function loadTess(){return new Promise((res,rej)=>{
+  if(window.Tesseract)return res(window.Tesseract);
+  const s=document.createElement('script');s.src=TESS_URL;s.async=true;
+  s.onload=()=>window.Tesseract?res(window.Tesseract):rej(new Error('offline'));
+  s.onerror=()=>rej(new Error('offline'));document.head.appendChild(s)})}
+async function readPhoto(file){
+  if(!file)return;
+  scMsg('Reading the photo… this can take a minute.');
+  try{
+    const T=await loadTess();
+    const r=await T.recognize(file,'eng',{logger:m=>{if(m&&m.status==='recognizing text')scMsg('Reading the photo… '+Math.round((m.progress||0)*100)+'%')}});
+    const text=((r&&r.data&&r.data.text)||'').trim();
+    G('scText').value=text;
+    scMsg(text?'Text found in the photo. Check it, then tap Make pages.':'No text was found in that photo. Try a clearer, closer photo.',!text)
+  }catch(err){
+    scMsg(err&&err.message==='offline'?'The photo reader could not load. It needs internet the first time. Check your connection and try again.':'Could not read that photo. Try a clearer photo, or paste the text.',1)}}
+G('scCamBtn').onclick=()=>{G('scCam').value='';G('scCam').click()};
+G('scImgBtn').onclick=()=>{G('scImg').value='';G('scImg').click()};
+G('scCam').onchange=e=>readPhoto(e.target.files[0]);
+G('scImg').onchange=e=>readPhoto(e.target.files[0]);
+
+// ---- tab open / leave ----
+new MutationObserver(()=>{if(!scSec.classList.contains('on'))halt()}).observe(scSec,{attributes:true,attributeFilter:['class']});
+new MutationObserver(()=>{if(scSec.classList.contains('on'))showLevel()}).observe(scSec,{attributes:true,attributeFilter:['class']});
+showLevel();
+}catch(err){console.error('[scan] could not start:',err)}})();
+// FEATURE:SCAN:END
+// FEATURE:PATH:START  (My Path tab: course units, placement check, unit checks and badges; a quiz on each Scan & Read page. Nothing is saved.)
+(function(){try{
+const G=id=>document.getElementById(id);
+const pathSec=G('pathSec');
+if(!pathSec)return;
+const pick=(arr,n)=>{const a=arr.slice(),out=[];while(a.length&&out.length<n)out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]);return out};
+const shuffle=arr=>pick(arr,arr.length);
+const LETTERS=['a','b','c','d','e','f','g','h','i','m','n','o','p','r','s','t','u'];
+const VOW=['a','e','i','o','u'];
+const MISSING=[['c_t','a'],['d_g','o'],['s_n','u'],['b_d','e'],['p_g','i'],['h_t','a'],['m_p','o'],['f_n','u'],['r_d','e'],['b_s','u']];
+const WORDS=['cat','dog','sun','bed','pig','hat','cup','fox','red','bus'];
+const SENT=[
+ ['The ___ ran to the shop.','dog',['cup','sun']],
+ ['I drink milk from a ___.','cup',['bed','pig']],
+ ['The ___ is hot and bright.','sun',['cat','bus']],
+ ['We sleep in a ___ at night.','bed',['fox','hat']],
+ ['The ___ ran over the hill.','fox',['bus','hat']],
+ ['A big yellow ___ drove by.','bus',['pig','sun']],
+ ['The ___ said oink.','pig',['hat','bed']],
+ ['I put my ___ on my head.','hat',['dog','cup']],
+ ['The ___ chased the ball.','dog',['bed','sun']]];
+const FALLBACK=['house','green','happy','water','light','apple','mouse'];
+const STOP=['that','this','with','from','there','their','they','have','were','what','when','then','them','said','into','over','under','down','very','just'];
+const unitState={1:null,2:null};let pageWins=0;
+
+// ---- questions ----
+function qLetter(){const L=pick(LETTERS,1)[0];return {type:'letter',say:L,prompt:'Listen. Which letter is it?',opts:shuffle([L,...pick(LETTERS.filter(x=>x!==L),2)]),ans:L,topic:'Letters'}}
+function qMissing(){const [w,a]=pick(MISSING,1)[0];return {type:'missing',prompt:'Which letter fills the gap?',word:w,opts:shuffle([a,...pick(VOW.filter(v=>v!==a),2)]),ans:a,topic:'Letters'}}
+function qWord(){const w=pick(WORDS,1)[0];return {type:'word',say:w,prompt:'Listen. Which word is it?',opts:shuffle([w,...pick(WORDS.filter(x=>x!==w),2)]),ans:w,topic:'Words'}}
+function qSent(){const [s,a,d]=pick(SENT,1)[0];return {type:'sent',prompt:'Which word fills the gap?',sentence:s,opts:shuffle([a,...d]),ans:a,topic:'Sentences'}}
+
+// ---- one question on screen, with feedback ----
+function askOne(q,box,label,done){
+  box.innerHTML='';
+  const pg=document.createElement('p');pg.className='pa-prog';pg.textContent=label;box.appendChild(pg);
+  const p=document.createElement('p');p.className='pa-prompt';p.textContent=q.prompt;box.appendChild(p);
+  if(q.word){const d=document.createElement('div');d.className='pa-big';d.textContent=q.word;box.appendChild(d)}
+  if(q.sentence){const d=document.createElement('div');d.className='pa-big pa-sent';d.textContent=q.sentence;box.appendChild(d)}
+  if(q.say){const b=document.createElement('button');b.className='pa-listen';b.textContent='🔊 Listen again';b.onclick=()=>say(q.say,.7);box.appendChild(b);setTimeout(()=>{if(box.contains(b))say(q.say,.7)},300)}
+  const row=document.createElement('div');row.className='pa-opts';
+  q.opts.forEach(o=>{const b=document.createElement('button');b.className='pa-opt';b.textContent=o;
+    b.onclick=()=>{if(row.dataset.done)return;row.dataset.done='1';const ok=o===q.ans;
+      b.classList.add(ok?'pa-right':'pa-wrong');
+      [...row.children].forEach(x=>{if(x.textContent===q.ans)x.classList.add('pa-right')});
+      const fb=document.createElement('p');fb.className='pa-fb';fb.textContent=ok?'Well done! ⭐':'Good try. The answer is "'+q.ans+'".';box.appendChild(fb);
+      done(ok,q)};
+    row.appendChild(b)});
+  box.appendChild(row)}
+function runSet(qs,title,box,finish){
+  let i=0,score=0;const misses=[];
+  const show=()=>{
+    if(i>=qs.length){finish(score,qs.length,misses);return}
+    askOne(qs[i],box,title+' · question '+(i+1)+' of '+qs.length,(ok,q)=>{
+      if(ok)score++;else misses.push(q.topic);
+      const nb=document.createElement('button');nb.className='go pa-next';nb.textContent=i<qs.length-1?'Next ➡':'See result';
+      nb.onclick=()=>{i++;show()};box.appendChild(nb)})};
+  show()}
+function showResult(box,head,text,again){
+  box.innerHTML='';const h=document.createElement('h3');h.textContent=head;box.appendChild(h);
+  const p=document.createElement('p');p.className='pa-fb';p.textContent=text;box.appendChild(p);
+  if(again){const b=document.createElement('button');b.className='go pa-next';b.textContent=again.label;b.onclick=again.go;box.appendChild(b)}}
+
+// ---- placement check: 5 questions, a suggestion only ----
+const paBody=G('paBody');
+function startPlacement(){
+  runSet([qLetter(),qMissing(),qWord(),qSent(),qSent()],'Placement check',paBody,(score,total)=>{
+    const where=score>=4?'Start at the Sentence tab (Intermediate or Advanced).':score>=2?'Start at the Blend tab.':'Start at the Letters tab, group 1.';
+    showResult(paBody,'Placement: '+score+' of '+total,where+' This is only a suggestion. Any tab can still be opened.',{label:'Back to my path',go:()=>{paBody.innerHTML=''}})})}
+
+// ---- unit checks: 10 questions, pass with 8 ----
+function startUnit(n){
+  const qs=n===1?[1,2,3,4,5].map(()=>qLetter()).concat([1,2,3,4,5].map(()=>qMissing()))
+               :[1,2,3,4,5].map(()=>qWord()).concat([1,2,3,4,5].map(()=>qSent()));
+  runSet(shuffle(qs),'Unit '+n+' check',paBody,(score,total,misses)=>{
+    const passed=score>=8;unitState[n]=passed?'passed':'practise';
+    const topics=[...new Set(misses)];
+    const text=passed?'Passed! The next unit is ready.':'Practise these again: '+topics.join(', ')+'. Then try the check again.';
+    const again=passed?{label:'Back to my path',go:()=>{paBody.innerHTML=''}}:{label:'Try the check again',go:()=>startUnit(n)};
+    showResult(paBody,'Unit '+n+': '+score+' of '+total,text,again);renderBadges();renderUnits()})}
+
+// ---- page quiz on the current Scan & Read page ----
+function blankQ(s,pool){
+  const toks=s.split(/\s+/);
+  const cands=toks.map((t,i)=>({i,c:t.replace(/[^A-Za-z]/g,'')})).filter(x=>x.c.length>=4&&!STOP.includes(x.c.toLowerCase()));
+  if(!cands.length)return null;
+  const c=pick(cands,1)[0],ans=c.c;
+  const dis=pick(pool.filter(w=>w.toLowerCase()!==ans.toLowerCase()),2);
+  FALLBACK.forEach(f=>{if(dis.length<2&&f!==ans.toLowerCase()&&!dis.includes(f))dis.push(f)});
+  const blanked=toks.map((t,i)=>i===c.i?t.replace(ans,'___'):t).join(' ');
+  return {type:'sent',prompt:'Which word fills the gap?',sentence:blanked,opts:shuffle([ans,...dis.slice(0,2)]),ans,topic:'Page'}}
+function startPageQuiz(){
+  const box=G('paQuizBox');
+  const sents=[...document.querySelectorAll('#scPage .sc-sent')].map(e=>e.textContent.trim()).filter(s=>s.split(/\s+/).length>=5);
+  const pool=[...new Set(sents.join(' ').split(/\s+/).map(w=>w.replace(/[^A-Za-z]/g,'')).filter(w=>w.length>=3))];
+  const qs=pick(sents,3).map(s=>blankQ(s,pool)).filter(Boolean);
+  if(!qs.length){box.innerHTML='<p class="pa-fb">Open a page with longer sentences first, then tap Quiz.</p>';return}
+  runSet(qs,'Page quiz',box,(score,total)=>{
+    if(score===total)pageWins++;
+    renderBadges();
+    showResult(box,'Page quiz: '+score+' of '+total,score===total?'Excellent reading!':'Good work. Read the page again and try once more.',{label:'Close quiz',go:()=>{box.innerHTML=''}})})}
+const qbox=document.createElement('div');qbox.id='paQuizBox';qbox.className='pa-box';
+G('scPage').parentNode.insertBefore(qbox,G('scPage').nextSibling);
+const qbtn=document.createElement('button');qbtn.id='paQuizBtn';qbtn.textContent='📝 Quiz this page';
+G('scSec').querySelector('.sc-size').appendChild(qbtn);
+qbtn.onclick=()=>{if(G('scPlay')&&G('scPlay').textContent.indexOf('Stop')>=0)G('scPlay').click();startPageQuiz()};
+['scPrev','scNext','scBack','scMake'].forEach(id=>{const e=G(id);if(e)e.addEventListener('click',()=>{qbox.innerHTML=''})});
+
+// ---- course units and badges ----
+const UNITS=[
+ {n:1,title:'Unit 1: Letters and sounds',what:'Letters tab and Blend tab',check:'Check: 10 questions, pass with 8.'},
+ {n:2,title:'Unit 2: Words and sentences',what:'Sentence tab: Preliminary, Intermediate and Advanced',check:'Check: 10 questions, pass with 8.'},
+ {n:3,title:'Unit 3: Reading real pages',what:'📷 Scan & Read: any book page you upload or photograph',check:'Check: tap 📝 Quiz this page after reading a page.'}];
+function renderUnits(){
+  const box=G('paUnits');box.innerHTML='';
+  UNITS.forEach(u=>{
+    const st=u.n===3?(pageWins>0?'passed':null):unitState[u.n];
+    const card=document.createElement('div');card.className='pa-unit';
+    const h=document.createElement('h3');h.textContent=u.title;
+    const p=document.createElement('p');p.textContent=u.what+'. '+u.check;
+    const s=document.createElement('p');s.className='pa-status';
+    s.textContent=st==='passed'?'Passed ✅':st==='practise'?'Practise again':'Not checked yet';
+    const b=document.createElement('button');b.className='go';
+    if(u.n===3){b.textContent='Go to Scan & Read';b.onclick=()=>{const t=document.querySelector('nav button[data-t="scSec"]');if(t)t.click()}}
+    else{b.textContent=st==='practise'?'Try the check again':'Start the check';b.onclick=()=>startUnit(u.n)}
+    card.appendChild(h);card.appendChild(p);card.appendChild(s);card.appendChild(b);box.appendChild(card)})}
+function renderBadges(){
+  const st=parseInt(((G('stars')||{}).textContent||'').replace(/\D/g,''))||0;
+  const list=[['⭐ First star',st>=1],['🌟 10 stars',st>=10],['🏆 25 stars',st>=25],['🎓 Unit 1 passed',unitState[1]==='passed'],['🎓 Unit 2 passed',unitState[2]==='passed'],['📖 Perfect page quiz',pageWins>0]];
+  const box=G('paBadges');box.innerHTML='';
+  list.forEach(([t,on])=>{const b=document.createElement('span');b.className='pa-badge'+(on?'':' pa-off');b.textContent=t;box.appendChild(b)})}
+function renderAll(){renderUnits();renderBadges()}
+G('paPlace').onclick=startPlacement;
+new MutationObserver(()=>{if(pathSec.classList.contains('on')){renderAll()}else{stop();paBody.innerHTML=''}}).observe(pathSec,{attributes:true,attributeFilter:['class']});
+renderAll();
+}catch(err){console.error('[path] could not start:',err)}})();
+// FEATURE:PATH:END
+</script>
+<script>/* Skillyfai: open a tab from the URL hash, e.g. #s2 or #scSec */(function(){function o(){var t=location.hash.slice(1),b=t&&document.querySelector('nav button[data-t="'+t+'"]');if(b)b.click()}o();window.addEventListener('hashchange',o)})();</script>
+</body>
+</html>

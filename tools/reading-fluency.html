@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reading Fluency Practice · Skillyfai</title>
+<link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Andika:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<style>
+  .passage { font-family: var(--font-kid); font-size: clamp(1.25rem, 2.6vw, 1.7rem); line-height: 2; }
+  .passage .w { padding: 2px 3px; border-radius: 6px; cursor: pointer; }
+  .passage .w.now { background: var(--sun); color: #222; }
+  .passage .w.err { background: color-mix(in srgb, var(--danger) 22%, transparent); text-decoration: line-through; text-decoration-color: var(--danger); }
+  .passage .w.last { border-right: 4px solid var(--primary); }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+  .stats div { background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 12px; text-align: center; }
+  .stats b { display: block; font-size: 1.7rem; letter-spacing: -.02em; }
+  .stats span { font-size: .78rem; color: var(--muted); }
+  @media (max-width: 560px) { .stats { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body data-root=".." data-page="reading">
+<main>
+  <div id="tool-hero" data-tool="fluency"></div>
+  <div class="wrap split">
+    <div class="sticky">
+      <div class="panel">
+        <h2>1. Choose a passage</h2>
+        <div class="chips" id="levels" style="margin-bottom:12px"></div>
+        <div class="field"><label for="own">Or paste your own text</label><textarea class="textarea" id="own" rows="4" placeholder="Paste a passage from the textbook…"></textarea>
+          <button class="btn btn-ghost btn-sm" id="useOwn" style="align-self:flex-start;margin-top:6px">Use this text</button></div>
+        <p class="small muted" style="margin:0">To read pages from your own book or a photo, use <a id="scanLink" href="#">Sound Friends: Scan &amp; Read</a>.</p>
+      </div>
+      <div class="panel">
+        <h2>2. Listen to a model reading</h2>
+        <div class="row"><button class="btn btn-soft" id="model">🔊 Read to me</button><button class="btn btn-ghost" id="stopModel">Stop</button></div>
+        <div class="field" style="margin-top:12px"><label for="rate">Speed</label><input type="range" id="rate" min="0.5" max="1.3" step="0.1" value="0.85"></div>
+      </div>
+      <div class="panel">
+        <h2>3. Timed reading</h2>
+        <div class="field"><label for="student">Student name</label><input class="input" id="student" placeholder="e.g. Diya"></div>
+        <ol class="small muted" style="padding-left:18px;margin:0 0 12px"><li>Press Start; the child reads aloud.</li><li>Tap any word read wrongly (tap again to undo).</li><li>Press Stop and tap the last word read.</li></ol>
+        <div class="row"><button class="btn btn-primary btn-lg" id="go">▶ Start</button><span class="big-num" id="clock" style="font-size:2rem">0:00</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-head"><h2 id="pTitle">Passage</h2><span class="badge" id="wc"></span></div>
+        <div class="passage" id="passage"></div>
+        <div class="stats" id="stats" hidden></div>
+        <div class="row" id="saveRow" hidden style="margin-top:12px"><button class="btn btn-primary btn-sm" id="saveRec">Save result</button><span class="small muted">Tap the last word read to adjust.</span></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Reading records</h2><button class="btn btn-ghost btn-sm" id="csv">Download CSV</button></div>
+        <div id="records"></div>
+        <p class="small muted" style="margin:10px 0 0">WCPM = words correct per minute. Many teachers look for steady growth over weeks rather than one fixed number.</p>
+      </div>
+    </div>
+  </div>
+  <div id="related" data-tool="fluency"></div>
+</main>
+<script src="../assets/js/catalog.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+(function () {
+  const { $, $$, esc, store, toast, speak, stopSpeak, hasTTS, download, url, S } = SK;
+  $("#scanLink").href = url(S.soundFriends.url) + "#scSec";
+  const P = {
+    "Level 1: The Red Kite": "Ravi has a red kite. He runs to the big field. The wind is strong today. Up, up goes the kite! It flies over the tall trees. Ravi is very happy. His little sister claps her hands. \"Can I hold it?\" she asks. Ravi gives her the string. Now they both fly the red kite.",
+    "Level 2: The Little Seed": "Meena planted a tiny seed in a pot. Every morning she gave it a little water and kept it in the sun. For many days nothing happened. Meena felt sad, but she did not give up. One morning she saw a small green shoot. \"It is growing!\" she shouted. Soon the shoot became a plant with soft green leaves. After some weeks, a bright yellow flower opened. Meena learned that good things take time and care.",
+    "Level 3: Rain in the Village": "The summer had been long and dry. The fields were brown, the pond was nearly empty, and the farmers looked at the sky every evening. Then one afternoon, dark clouds rolled in from the hills. Thunder rumbled and the first heavy drops began to fall. Children ran outside, laughing and spinning in the rain. The dusty air filled with the sweet smell of wet earth. By night the pond was full again, and frogs began their noisy songs. The farmers smiled. Tomorrow, they would begin to sow their seeds.",
+    "Level 4: The Lighthouse Keeper": "On a rocky island far from the shore stood an old lighthouse. Its keeper, Mr. Das, climbed one hundred and twelve steps every evening to light the great lamp. Ships depended on that light to avoid the dangerous rocks hidden beneath the waves. One stormy night, the power failed. Mr. Das quickly lit oil lanterns and arranged them behind the giant lens. The beam was weaker, but it was enough. Far away, a fishing boat changed its course and sailed safely into the harbour. The next morning the grateful fishermen brought him fresh fish and a warm thank-you."
+  };
+  let title = store.get("fl:title", Object.keys(P)[0]), text = store.get("fl:text", P[title]);
+  let words = [], errs = new Set(), last = -1, t0 = 0, elapsed = 0, timer = null, running = false, done = false;
+
+  function paintLevels() { $("#levels").innerHTML = Object.keys(P).map((k) => `<button class="chip ${k === title ? "on" : ""}" data-k="${esc(k)}">${esc(k.split(":")[0])}</button>`).join(""); }
+  function load(t, body) {
+    title = t; text = body; store.set("fl:title", t); store.set("fl:text", body);
+    words = body.split(/\s+/).filter(Boolean); errs = new Set(); last = -1; done = false; elapsed = 0; $("#clock").textContent = "0:00";
+    $("#pTitle").textContent = t.replace(/^Level \d: /, ""); $("#wc").textContent = words.length + " words";
+    $("#passage").innerHTML = words.map((w, i) => `<span class="w" data-i="${i}">${esc(w)}</span>`).join(" ");
+    $("#stats").hidden = true; $("#saveRow").hidden = true; paintLevels();
+  }
+  $("#levels").onclick = (e) => { const b = e.target.closest("[data-k]"); if (b) load(b.dataset.k, P[b.dataset.k]); };
+  $("#useOwn").onclick = () => { const t = $("#own").value.trim(); if (t.split(/\s+/).length < 5) return toast("Paste a longer passage"); load("My passage", t); };
+
+  /* model reading with word highlighting */
+  $("#model").onclick = () => {
+    if (!hasTTS) return toast("This browser has no speech voice");
+    const starts = []; let pos = 0; words.forEach((w) => { pos = text.indexOf(w, pos); starts.push(pos); pos += w.length; });
+    const spans = $$("#passage .w");
+    speak(text, { rate: +$("#rate").value, onboundary: (e) => {
+      if (e.name && e.name !== "word") return;
+      let k = starts.findIndex((s, j) => e.charIndex >= s && (j === starts.length - 1 || e.charIndex < starts[j + 1]));
+      spans.forEach((s) => s.classList.remove("now")); if (k >= 0) spans[k].classList.add("now");
+    } }).then(() => $$("#passage .w").forEach((s) => s.classList.remove("now")));
+  };
+  $("#stopModel").onclick = () => { stopSpeak(); $$("#passage .w").forEach((s) => s.classList.remove("now")); };
+
+  /* timed reading */
+  const fmt = (ms) => { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+  $("#go").onclick = () => {
+    if (!running) {
+      stopSpeak(); errs = new Set(); last = -1; done = false; $$("#passage .w").forEach((s) => s.className = "w");
+      running = true; t0 = Date.now(); $("#go").textContent = "■ Stop"; $("#stats").hidden = true; $("#saveRow").hidden = true;
+      timer = setInterval(() => { elapsed = Date.now() - t0; $("#clock").textContent = fmt(elapsed); }, 250);
+    } else {
+      running = false; done = true; clearInterval(timer); elapsed = Date.now() - t0; $("#go").textContent = "▶ Start again";
+      last = words.length - 1; paintResult(); toast("Tap the last word the child read, if they did not finish.");
+    }
+  };
+  $("#passage").onclick = (e) => {
+    const s = e.target.closest(".w"); if (!s) return; const i = +s.dataset.i;
+    if (running) { errs.has(i) ? errs.delete(i) : errs.add(i); s.classList.toggle("err"); }
+    else if (done) { last = i; paintResult(); }
+  };
+  function result() {
+    const attempted = last + 1, e = [...errs].filter((i) => i <= last).length, correct = Math.max(0, attempted - e), min = elapsed / 60000;
+    return { attempted, e, correct, wcpm: min ? Math.round(correct / min) : 0, acc: attempted ? Math.round((correct / attempted) * 100) : 0, time: fmt(elapsed) };
+  }
+  function paintResult() {
+    $$("#passage .w").forEach((s, i) => s.classList.toggle("last", i === last));
+    const r = result();
+    $("#stats").hidden = false; $("#saveRow").hidden = false;
+    $("#stats").innerHTML = `<div><b>${r.wcpm}</b><span>WCPM</span></div><div><b>${r.acc}%</b><span>Accuracy</span></div><div><b>${r.correct}/${r.attempted}</b><span>Words correct</span></div><div><b>${r.time}</b><span>Time</span></div>`;
+  }
+  const recs = () => store.get("fl:records", []);
+  function paintRecs() {
+    const R = recs();
+    $("#records").innerHTML = R.length ? `<div style="overflow-x:auto"><table class="doc" style="width:100%"><thead><tr><th>Date</th><th>Student</th><th>Passage</th><th>WCPM</th><th>Accuracy</th><th></th></tr></thead><tbody>
+      ${R.map((r, i) => `<tr><td>${new Date(r.d).toLocaleDateString()}</td><td>${esc(r.s)}</td><td>${esc(r.p)}</td><td><b>${r.wcpm}</b></td><td>${r.acc}%</td><td><button class="btn btn-ghost btn-sm" data-x="${i}" aria-label="Delete">✕</button></td></tr>`).join("")}</tbody></table></div>`
+      : '<p class="muted small" style="margin:0">No records yet. Do a timed reading and press Save result.</p>';
+  }
+  $("#records").onclick = (e) => { const b = e.target.closest("[data-x]"); if (b && confirm("Delete this record?")) { const R = recs(); R.splice(+b.dataset.x, 1); store.set("fl:records", R); paintRecs(); } };
+  $("#saveRec").onclick = () => { const r = result(); const R = recs(); R.unshift({ d: Date.now(), s: $("#student").value.trim() || "Student", p: $("#pTitle").textContent, wcpm: r.wcpm, acc: r.acc }); store.set("fl:records", R.slice(0, 300)); paintRecs(); toast("Result saved"); };
+  $("#csv").onclick = () => { const R = recs(); if (!R.length) return toast("No records yet"); download("reading-records.csv", "Date,Student,Passage,WCPM,Accuracy\n" + R.map((r) => [new Date(r.d).toLocaleDateString(), r.s, r.p, r.wcpm, r.acc + "%"].map((x) => '"' + String(x).replace(/"/g, '""') + '"').join(",")).join("\n"), "text/csv"); };
+  $("#student").value = store.get("fl:student", ""); $("#student").oninput = (e) => store.set("fl:student", e.target.value);
+  load(title, text); paintRecs();
+})();
+</script>
+</body>
+</html>

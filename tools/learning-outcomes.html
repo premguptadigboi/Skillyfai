@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learning Outcomes Planner · Skillyfai</title>
+<link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<style>
+  .lo-list { margin: 14px 0 0; padding-left: 26px; }
+  .lo-list li { margin-bottom: 10px; padding-left: 4px; }
+</style>
+</head>
+<body data-root=".." data-page="toolkit">
+<main>
+  <div id="tool-hero" data-tool="learning-outcomes" data-sub="Choose the subject and class, enter the topic and press Generate. You get 6–8 numbered learning outcomes written for your subject. Press “Other wording” for a fresh variation."></div>
+  <div id="planner"></div>
+  <div id="related" data-tool="learning-outcomes"></div>
+</main>
+<script src="../assets/js/catalog.js"></script>
+<script src="../assets/js/core.js"></script>
+<script src="../assets/js/planner.js"></script>
+<script>
+/* ==========================================================================
+   Learning outcome banks (local, no external service)
+
+   Every subject has its own list of complete sentence patterns. A pattern is
+   { t: "{verb} problems involving {topic}", verbs: [...] }. The verbs listed
+   for a pattern are ONLY the ones that make that sentence read correctly, so
+   the topic is never pasted onto a sentence that does not suit it.
+
+   To add a subject:   add an entry to BANKS and a line to SUBJECT_MATCH.
+   To add wording:     add a pattern to that subject's `patterns` (or a verb to a `verbs` list).
+   ========================================================================== */
+const BANKS = {
+  math: { name: "Mathematics", patterns: [
+    { t: "{verb} problems involving {topic}", verbs: ["solve", "calculate", "compute", "model"] },
+    { t: "{verb} the concept of {topic} using real-life objects", verbs: ["represent", "model", "apply", "demonstrate", "illustrate"] },
+    { t: "{verb} {topic} accurately", verbs: ["calculate", "compute", "solve", "apply"] },
+    { t: "{verb} the answers to problems involving {topic}", verbs: ["estimate", "check", "verify"] },
+    { t: "{verb} {topic} to real-life situations", verbs: ["apply", "relate"] },
+    { t: "{verb} word problems based on {topic}", verbs: ["solve", "formulate"] },
+    { t: "{verb} the steps used in {topic}", verbs: ["explain", "describe"] },
+    { t: "{verb} {topic} using pictures, tables or diagrams", verbs: ["represent", "show", "model"] },
+    { t: "{verb} {topic} using a number line or counters", verbs: ["solve", "represent", "show"] },
+    { t: "{verb} mistakes in {topic} and correct them", verbs: ["identify", "find"] },
+    { t: "{verb} the rules of {topic}", verbs: ["state", "explain", "describe"] },
+    { t: "{verb} the answers to {topic} using different methods", verbs: ["compute", "check", "calculate"] }
+  ] },
+  lang: { name: "English / Languages", patterns: [
+    { t: "{verb} texts related to {topic}", verbs: ["read", "comprehend", "analyze", "summarize"] },
+    { t: "{verb} their thoughts on {topic} clearly", verbs: ["write", "compose", "express", "share", "present"] },
+    { t: "{verb} the key words and ideas related to {topic}", verbs: ["identify", "list", "recall"] },
+    { t: "{verb} a short paragraph on {topic}", verbs: ["write", "compose"] },
+    { t: "{verb} questions about {topic} in complete sentences", verbs: ["answer", "ask"] },
+    { t: "{verb} new words related to {topic} in their own sentences", verbs: ["use"] },
+    { t: "{verb} the main idea of texts about {topic}", verbs: ["identify", "summarize", "explain"] },
+    { t: "{verb} about {topic} with confidence", verbs: ["speak", "talk"] },
+    { t: "{verb} the meanings of new words in texts about {topic}", verbs: ["find", "explain"] },
+    { t: "{verb} sentences correctly when writing about {topic}", verbs: ["write", "compose", "construct"] },
+    { t: "{verb} aloud a text about {topic} with correct pronunciation", verbs: ["read", "recite"] }
+  ] },
+  sci: { name: "Science / EVS", patterns: [
+    { t: "{verb} the processes involved in {topic}", verbs: ["observe", "investigate", "explain", "describe"] },
+    { t: "{verb} the characteristics of {topic}", verbs: ["observe", "identify", "describe", "classify", "compare", "explain"] },
+    { t: "{verb} the results of simple activities on {topic}", verbs: ["predict", "record", "explain", "observe", "measure"] },
+    { t: "{verb} with simple materials to learn about {topic}", verbs: ["experiment"] },
+    { t: "{verb} questions to find out more about {topic}", verbs: ["ask", "formulate"] },
+    { t: "{verb} examples of {topic} from their surroundings", verbs: ["identify", "classify", "observe", "give"] },
+    { t: "{verb} their observations about {topic} in a table or drawing", verbs: ["record", "present"] },
+    { t: "{verb} the importance of {topic} in daily life", verbs: ["explain", "describe", "discuss"] },
+    { t: "{verb} the parts or stages of {topic}", verbs: ["identify", "name", "label", "describe"] },
+    { t: "{verb} how {topic} is connected to living things and the environment", verbs: ["explain", "describe", "discuss"] },
+    { t: "{verb} patterns in {topic}", verbs: ["observe", "identify", "describe"] }
+  ] },
+  soc: { name: "Social Science", patterns: [
+    { t: "{verb} the events related to {topic}", verbs: ["trace", "describe", "analyze", "compare"] },
+    { t: "{verb} the significance of {topic}", verbs: ["describe", "analyze", "explain", "discuss"] },
+    { t: "{verb} the main places linked to {topic}", verbs: ["locate", "map", "identify", "describe"] },
+    { t: "{verb} the causes and effects of {topic}", verbs: ["analyze", "explain", "describe"] },
+    { t: "{verb} different points of view about {topic}", verbs: ["compare", "describe", "discuss"] },
+    { t: "{verb} how {topic} affects people's lives", verbs: ["explain", "describe", "analyze"] },
+    { t: "{verb} the role of {topic} in our society", verbs: ["describe", "explain", "analyze", "discuss"] },
+    { t: "{verb} information about {topic} from books, maps and pictures", verbs: ["collect", "gather"] },
+    { t: "{verb} the contribution of important people in {topic}", verbs: ["describe", "explain", "discuss"] },
+    { t: "{verb} how {topic} has changed over time", verbs: ["trace", "describe", "explain", "compare"] },
+    { t: "{verb} sources of information about {topic}", verbs: ["identify", "list", "use"] }
+  ] },
+  /* Used for any other subject, or when the subject is "Other" */
+  generic: { name: "General", patterns: [
+    { t: "{verb} the key concepts of {topic}", verbs: ["explain", "describe", "summarize", "discuss"] },
+    { t: "{verb} the main features of {topic}", verbs: ["describe", "identify", "list"] },
+    { t: "{verb} examples of {topic} from daily life", verbs: ["give", "identify", "find"] },
+    { t: "{verb} the importance of {topic}", verbs: ["explain", "discuss", "describe"] },
+    { t: "{verb} {topic} in their own words", verbs: ["explain", "describe", "summarize"] },
+    { t: "{verb} what they have learned about {topic} to everyday situations", verbs: ["apply"] },
+    { t: "{verb} questions about {topic}", verbs: ["ask", "answer"] },
+    { t: "{verb} important terms related to {topic}", verbs: ["identify", "define", "list"] },
+    { t: "{verb} {topic} with examples", verbs: ["explain", "describe", "illustrate"] },
+    { t: "{verb} the steps or stages of {topic}", verbs: ["list", "describe", "explain"] }
+  ] }
+};
+/* Which words in the Subject box select which bank (checked in this order) */
+const SUBJECT_MATCH = [
+  ["math", /math/i],
+  ["lang", /english|hindi|assamese|bengali|bangla|bodo|sanskrit|urdu|nepali|language|literature|grammar/i],
+  ["soc", /social|history|geograph|civics|political|polity|economics/i],   // before "sci": "Social Science" contains the word "science"
+  ["sci", /science|evs|environment|physics|chemistry|biology/i]
+];
+const bankFor = (subject) => { const m = SUBJECT_MATCH.find(([, re]) => re.test(subject || "")); return BANKS[m ? m[0] : "generic"]; };
+
+/* ---------- helpers ---------- */
+const hashStr = (s) => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0; };
+const rng = (seed) => { let a = seed >>> 0; return () => { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+const shuffled = (a, r) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const ROMAN = { i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7, viii: 8, ix: 9, x: 10, xi: 11, xii: 12 };
+const classNo = (c) => { const m = String(c).match(/\d+/); if (m) return +m[0]; const r = String(c).toLowerCase().match(/\b(xii|xi|x|ix|viii|vii|vi|v|iv|iii|ii|i)\b/); return r ? ROMAN[r[1]] : 0; };
+/* Younger classes get 6 outcomes, middle classes 7, older classes 8 */
+const outcomeCount = (c) => { const n = classNo(c); return !n ? 7 : n <= 2 ? 6 : n <= 5 ? 7 : 8; };
+/* "Plants and their parts" reads better in the middle of a sentence as "plants and their parts"; ADDITION, India etc. stay as typed */
+const topicText = (t) => { t = t.trim().replace(/\s+/g, " "); return (t.match(/[A-Z]/g) || []).length === 1 && /^[A-Z]/.test(t) ? t.charAt(0).toLowerCase() + t.slice(1) : t; };
+
+/* ---------- generation ----------
+   seed 0  : the first patterns of the bank, in order, each with its first free verb (steady, predictable default)
+   seed > 0: random patterns in random order, each with a random free verb ("Other wording")
+   Within one list a verb is not repeated unless a pattern has no unused verb left. */
+function buildOutcomes(v, seed) {
+  const bank = bankFor(v.subject), topic = topicText(v.topic), n = outcomeCount(v.cls), used = new Set();
+  const r = rng(hashStr(v.topic.toLowerCase()) + seed * 7919);
+  const patterns = seed === 0 ? bank.patterns : shuffled(bank.patterns, r);
+  return patterns.slice(0, n).map((p) => {
+    const free = p.verbs.filter((x) => !used.has(x)), pool = free.length ? free : p.verbs;
+    const verb = seed === 0 ? pool[0] : pool[Math.floor(r() * pool.length)];
+    used.add(verb);
+    return { verb, text: "Students will be able to " + p.t.replace("{verb}", verb).replace("{topic}", topic) + "." };
+  });
+}
+/* A new variation for "Other wording": try many seeds and keep the one that shares the fewest verbs and sentences with the current list */
+function otherSeed(v, current) {
+  const verbs = new Set(current.map((o) => o.verb)), texts = new Set(current.map((o) => o.text));
+  let best = 1, bestScore = Infinity;
+  for (let i = 0; i < 150; i++) {
+    const s = 1 + Math.floor(Math.random() * 100000), list = buildOutcomes(v, s);
+    const score = list.filter((o) => verbs.has(o.verb)).length + 5 * list.filter((o) => texts.has(o.text)).length;
+    if (score < bestScore) { best = s; bestScore = score; if (!score) break; }
+  }
+  return best;
+}
+
+let seed = 0, current = [];
+// Fill example and Clear always return to the steady default wording
+document.addEventListener("click", (e) => { if (e.target.closest("[data-act=example],[data-act=clear]")) seed = 0; }, true);
+
+SKPlanner({
+  key: "outcomes", noun: "outcome set",
+  emptyText: "Select the subject and class, enter the topic, then press “Generate Learning Outcomes”.", emptyIcon: "🎯",
+  generateLabel: "✨ Generate Learning Outcomes",
+  validate: (v) => !v.subject ? "Please select the subject" : !v.cls ? "Please select the class" : !v.topic ? "Please enter the topic" : "",
+  title: (v) => (v.topic || "Outcomes") + (v.cls ? " (" + v.cls + ")" : ""),
+  fields: [
+    { id: "subject", label: "Subject", half: true, type: "select", placeholder: "Select subject", options: ["English", "Mathematics", "EVS", "Science", "Social Science", "Hindi", "Assamese", "Other"] },
+    { id: "cls", label: "Class / Grade", half: true, type: "select", placeholder: "Select class", options: Array.from({ length: 12 }, (_, i) => "Class " + (i + 1)) },
+    { id: "topic", label: "Topic", placeholder: "e.g. Addition" }
+  ],
+  example: { subject: "Mathematics", cls: "Class 4", topic: "Addition" },
+  actions: [{ label: "↻ Other wording", run: (ctx) => {
+    const v = ctx.read(); if (!v.topic) return SK.toast("Enter a topic first");
+    seed = otherSeed(v, current); ctx.render();
+  } }],
+  render(v, H) {
+    if (!v.topic) return `<div class="empty"><div class="e-icon">🎯</div><p>${v.subject || v.cls ? "Now enter the <b>topic</b> to see your learning outcomes." : "Enter a subject, class and topic to see your learning outcomes."}</p></div>`;
+    current = buildOutcomes(v, seed);
+    return `<h2>Learning outcomes: ${H.esc(v.topic)}</h2><div class="muted">${H.esc([v.subject, v.cls].filter(Boolean).join(" · "))}</div>
+      <ol class="lo-list">${current.map((o) => `<li>${H.esc(o.text)}</li>`).join("")}</ol>`;
+  }
+});
+</script>
+</body>
+</html>

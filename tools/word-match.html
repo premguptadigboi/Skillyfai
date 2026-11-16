@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Word Matching Game · Skillyfai</title>
+<link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Andika:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<style>
+  .match { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 28px; max-width: 760px; margin: 0 auto; }
+  .col { display: flex; flex-direction: column; gap: 10px; }
+  .w { font-family: var(--font-kid); font-size: clamp(1.05rem, 2.6vw, 1.4rem); font-weight: 700; padding: 14px 16px; border-radius: 16px; border: 2px solid var(--border); background: var(--surface); cursor: pointer; box-shadow: 0 4px 0 var(--border); transition: transform .08s; color: var(--text); }
+  .w:hover { border-color: var(--primary); }
+  .w.sel { border-color: var(--primary); background: var(--primary-soft); transform: translateY(-2px); }
+  .w.ok { border-color: var(--success); background: color-mix(in srgb, var(--success) 14%, var(--surface)); color: var(--success); cursor: default; box-shadow: none; opacity: .8; }
+  .w.bad { border-color: var(--danger); }
+  .hud { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 18px; }
+</style>
+</head>
+<body data-root=".." data-page="toolkit">
+<main>
+  <div id="tool-hero" data-tool="word-match"></div>
+  <div class="wrap split">
+    <div class="sticky no-print" id="editor">
+      <div class="panel">
+        <div class="field"><label for="title">Game title</label><input class="input" id="title" placeholder="e.g. Opposites"></div>
+        <div class="field"><label for="pairs">Pairs (one per line, use <b>=</b>)</label>
+          <textarea class="textarea" id="pairs" rows="9" placeholder="hot = cold&#10;big = small"></textarea>
+          <span class="hint"><span id="pc">0</span> pairs · up to 6 are shown per round</span></div>
+        <div class="label" style="margin-bottom:6px">Ready-made sets</div>
+        <div class="chips" id="presets"></div>
+        <label class="check" style="margin-top:14px"><input type="checkbox" id="speakOn" checked> <span>Read words aloud when tapped</span></label>
+        <div class="row" style="margin-top:14px"><button class="btn btn-primary" id="start">▶ Start game</button><button class="btn btn-ghost" id="share">🔗 Share link</button></div>
+      </div>
+    </div>
+    <div class="panel fs-target kid" id="stage">
+      <div class="hud"><span class="badge" id="round">Round 1</span><span class="stars-bar">⭐ <span id="score">0</span></span><span class="badge" id="time">0:00</span><button class="btn btn-ghost btn-sm no-print" id="fs">⛶</button></div>
+      <h2 class="center" id="gTitle" style="margin-bottom:18px"></h2>
+      <div class="match" id="board"><div class="empty" style="grid-column:1/-1"><div class="e-icon">🔗</div><p>Pick a set or type your pairs, then press <b>Start game</b>.</p></div></div>
+    </div>
+  </div>
+  <div id="related" data-tool="word-match"></div>
+</main>
+<script src="../assets/js/catalog.js"></script>
+<script src="../assets/js/core.js"></script>
+<script>
+(function () {
+  const { $, $$, esc, store, shuffle, toast, speak, celebrate, encodeShare, decodeShare, copyText, toggleFullscreen } = SK;
+  const PRESETS = {
+    "Opposites": "hot = cold\nbig = small\nhappy = sad\nfast = slow\nup = down\nday = night\nopen = close\nfull = empty",
+    "Animal babies": "cat = kitten\ndog = puppy\ncow = calf\nhen = chick\nfrog = tadpole\nlion = cub\nsheep = lamb\nhorse = foal",
+    "Animal homes": "bird = nest\nbee = hive\nlion = den\nhorse = stable\nspider = web\ndog = kennel\nrabbit = burrow\nfish = water",
+    "Rhyming words": "cat = hat\nsun = fun\nbook = cook\ntree = bee\nring = king\nboat = coat\ncake = lake\nmouse = house",
+    "Shapes": "3 sides = triangle\n4 equal sides = square\nround = circle\n6 sides = hexagon\n5 sides = pentagon\n8 sides = octagon",
+    "English–Hindi": "water = पानी\nsun = सूरज\nbook = किताब\nhouse = घर\nflower = फूल\nmother = माँ\ntree = पेड़\nbird = चिड़िया"
+  };
+  $("#presets").innerHTML = Object.keys(PRESETS).map((k) => `<button class="chip" data-p="${k}">${k}</button>`).join("");
+  const d = store.get("match:draft", { title: "Opposites", pairs: PRESETS["Opposites"] });
+  $("#title").value = d.title; $("#pairs").value = d.pairs;
+  const parse = () => $("#pairs").value.split("\n").map((l) => l.split("=")).filter((p) => p.length >= 2 && p[0].trim() && p[1].trim()).map((p) => [p[0].trim(), p.slice(1).join("=").trim()]);
+  const upd = () => { $("#pc").textContent = parse().length; store.set("match:draft", { title: $("#title").value, pairs: $("#pairs").value }); };
+  $("#editor").addEventListener("input", upd); upd();
+  $("#presets").onclick = (e) => { const b = e.target.closest("[data-p]"); if (!b) return; $("#pairs").value = PRESETS[b.dataset.p]; $("#title").value = b.dataset.p; upd(); };
+
+  let all = [], rounds = [], ri = 0, sel = null, score = 0, t0 = 0, timer = null, left = 0, title = "";
+  function start(pairs, ttl) {
+    if (pairs.length < 2) { toast("Add at least 2 pairs"); return; }
+    all = shuffle(pairs); rounds = []; for (let i = 0; i < all.length; i += 6) rounds.push(all.slice(i, i + 6));
+    if (rounds.length > 1 && rounds[rounds.length - 1].length < 2) rounds[rounds.length - 2].push(...rounds.pop());
+    ri = 0; score = 0; title = ttl; t0 = Date.now(); clearInterval(timer);
+    timer = setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); $("#time").textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }, 500);
+    paintRound();
+  }
+  function paintRound() {
+    const r = rounds[ri]; left = r.length; sel = null;
+    $("#gTitle").textContent = title || "Match the pairs";
+    $("#round").textContent = `Round ${ri + 1} of ${rounds.length}`; $("#score").textContent = score;
+    const L = shuffle(r.map((p, i) => ({ t: p[0], i }))), R = shuffle(r.map((p, i) => ({ t: p[1], i })));
+    $("#board").innerHTML = `<div class="col">${L.map((x) => `<button class="w" data-s="L" data-i="${x.i}">${esc(x.t)}</button>`).join("")}</div>
+      <div class="col">${R.map((x) => `<button class="w" data-s="R" data-i="${x.i}">${esc(x.t)}</button>`).join("")}</div>`;
+  }
+  $("#board").onclick = (e) => {
+    const b = e.target.closest(".w"); if (!b || b.classList.contains("ok")) return;
+    if ($("#speakOn").checked) speak(b.textContent, { rate: .85 });
+    if (!sel || sel.dataset.s === b.dataset.s) { $$(".w.sel").forEach((x) => x.classList.remove("sel")); sel = b; b.classList.add("sel"); return; }
+    if (sel.dataset.i === b.dataset.i) {
+      [sel, b].forEach((x) => { x.classList.remove("sel"); x.classList.add("ok", "pop"); });
+      score++; left--; $("#score").textContent = score; sel = null;
+      if (!left) setTimeout(() => {
+        if (++ri < rounds.length) paintRound();
+        else { clearInterval(timer); celebrate(); $("#board").innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="e-icon">🏆</div><h2>All matched!</h2><p>${score} pairs in ${$("#time").textContent}</p><button class="kid-btn mint" id="again">Play again</button></div>`; }
+      }, 500);
+    } else { [sel, b].forEach((x) => { x.classList.add("bad", "shake"); setTimeout(() => x.classList.remove("bad", "shake", "sel"), 450); }); sel = null; }
+  };
+  $("#stage").addEventListener("click", (e) => { if (e.target.id === "again") start(all, title); });
+  $("#start").onclick = () => start(parse(), $("#title").value.trim());
+  $("#fs").onclick = () => toggleFullscreen($("#stage"));
+  $("#share").onclick = () => { const p = parse(); if (p.length < 2) return toast("Add at least 2 pairs"); copyText(location.href.split("#")[0] + "#g=" + encodeShare({ t: $("#title").value, p })); };
+  const m = location.hash.match(/g=([\w-]+)/);
+  if (m) { const g = decodeShare(m[1]); if (g && g.p) { $("#editor").hidden = true; $("#stage").parentElement.style.display = "block"; start(g.p, g.t); } }
+})();
+</script>
+</body>
+</html>

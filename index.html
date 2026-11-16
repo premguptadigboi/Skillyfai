@@ -1,1 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skillyfai · Smart Tools for Teachers</title>
+<meta name="description" content="Skillyfai: free lesson planning, classroom activities, educational games, reading and writing practice tools for teachers and students. Smart Tools. Better Teaching. Engaged Learning.">
+<link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body data-root="." data-page="home">
 
+<main>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">✨ Free digital companion for teachers</span>
+        <h1>Smart Tools. Better Teaching. <span class="grad">Engaged Learning.</span></h1>
+        <p class="lead">Skillyfai brings lesson planning, classroom activities, educational games, reading and writing practice together in one place. Free, no login, and it runs in your browser.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="#toolkit">Explore the Toolkit</a>
+          <a class="btn btn-ghost btn-lg" href="#reading">Reading &amp; Writing for kids</a>
+        </div>
+        <div class="hero-stats">
+          <div><b id="statTools">23</b><span>classroom tools</span></div>
+          <div><b>3</b><span>learning areas</span></div>
+          <div><b>₹0</b><span>free, no sign-up</span></div>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hv-card">
+          <div class="hv-head"><span class="hv-dot"></span><span class="hv-dot"></span><span class="hv-dot"></span></div>
+          <div class="hv-grid">
+            <div class="hv-tile"><div class="ti">📝</div><b>Lesson Plan</b><small>40 min · Class 5 Science</small></div>
+            <div class="hv-tile"><div class="ti">🧠</div><b>Quiz Maker</b><small>10 questions ready</small></div>
+            <div class="hv-tile"><div class="ti">🔤</div><b>Phonics</b><small>s · a · t → sat</small></div>
+            <div class="hv-tile"><div class="ti">✏️</div><b>Tracing</b><small>A B C a b c</small></div>
+          </div>
+        </div>
+        <div class="hv-float f1">⭐ Group of 5 ready</div>
+        <div class="hv-float f2">⏱️ 02:00 Think time</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Three pillars -->
+  <section class="section" style="padding-top:20px">
+    <div class="wrap">
+      <div class="pillars" id="pillars"></div>
+    </div>
+  </section>
+
+  <!-- Search -->
+  <section class="section" id="search">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2>Find a tool</h2>
+          <p>Search by name or need, for example "rubric", "groups", "tracing" or "sight words".</p>
+        </div>
+      </div>
+      <div class="search-bar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Search 23 tools…" aria-label="Search tools" autocomplete="off">
+        <kbd>/</kbd>
+      </div>
+      <div class="chips" id="filters" style="margin-top:14px"></div>
+      <div id="results" style="margin-top:18px" hidden></div>
+    </div>
+  </section>
+
+  <!-- Section 1: Teacher Toolkit -->
+  <section class="section" id="toolkit">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="section-tag" style="color:var(--primary-ink)"><i style="background:var(--primary-soft)">🧰</i> Section 1</div>
+          <h2>Teacher Toolkit</h2>
+          <p>Practical planners and classroom games. Fill a form, get a printable plan, or put a game on the big screen.</p>
+        </div>
+      </div>
+      <div data-cat="planning"></div>
+      <div data-cat="activity"></div>
+      <div data-cat="games"></div>
+    </div>
+  </section>
+
+  <!-- Section 2: Reading -->
+  <section class="section" id="reading">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="section-tag" style="color:var(--mint)"><i style="background:var(--mint-soft)">📖</i> Section 2</div>
+          <h2>Reading &amp; Language Development</h2>
+          <p>Help children hear sounds, blend words, read fluently and grow their vocabulary, using the speech voice already built into the browser.</p>
+        </div>
+      </div>
+      <div class="spotlight">
+        <div class="s-icon">🐻</div>
+        <div>
+          <h3>Sound Friends: phonics &amp; reading app</h3>
+          <p>Your complete letter-sound, blending, sentence reading and Scan &amp; Read app, now part of Skillyfai.</p>
+          <div class="chips" id="sfParts" style="margin-top:12px"></div>
+        </div>
+        <a class="btn btn-primary" id="sfOpen" href="apps/sound-friends/index.html">Open Sound Friends</a>
+      </div>
+      <div data-cat="reading" data-flat></div>
+    </div>
+  </section>
+
+  <!-- Section 3: Writing -->
+  <section class="section" id="writing">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="section-tag" style="color:var(--coral)"><i style="background:var(--coral-soft)">✏️</i> Section 3</div>
+          <h2>Writing Development</h2>
+          <p>From tracing the first letter to writing a whole story: on-screen practice for tablets and touch screens, plus printable worksheets.</p>
+        </div>
+      </div>
+      <div data-cat="writing" data-flat></div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head"><div><h2>Made for busy classrooms</h2><p>No accounts, no downloads, no cost.</p></div></div>
+      <div class="steps">
+        <div class="step"><div class="n">1</div><h3>Pick a tool</h3><p>Open any tool on a laptop, phone, tablet or the classroom projector.</p></div>
+        <div class="step"><div class="n">2</div><h3>Create in minutes</h3><p>Use ready suggestions and examples, then adjust them to fit your class.</p></div>
+        <div class="step"><div class="n">3</div><h3>Print, share or play</h3><p>Print worksheets, save as Word, share quizzes by link, or play games live.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="cta">
+        <h2>Start with today's lesson</h2>
+        <p>Create a complete lesson plan, then add an activity and a quick quiz, all in one place.</p>
+        <div class="row" style="justify-content:center">
+          <a class="btn btn-white btn-lg" href="tools/lesson-plan.html">Create a lesson plan</a>
+          <a class="btn btn-outline-white btn-lg" href="tools/quiz-maker.html">Make a quiz</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="assets/js/catalog.js"></script>
+<script src="assets/js/core.js"></script>
+<script>
+(function () {
+  const { S, $, $$, esc, card, url } = SK;
+  const secOf = (t) => S.categories.find((c) => c.id === t.cat).section;
+  $("#statTools").textContent = S.tools.length;
+  $("#q").placeholder = "Search " + S.tools.length + " tools…";
+
+  // Pillars
+  $("#pillars").innerHTML = S.sections.map((s) => {
+    const ts = S.tools.filter((t) => secOf(t) === s.id);
+    return `<a class="pillar" href="#${s.id}" style="--tint:${s.tint}">
+      <div class="p-icon">${s.icon}</div><h3>${s.name}</h3><p>${s.blurb}</p>
+      <ul>${ts.slice(0, 5).map((t) => `<li>${esc(t.name.replace(/ (Practice|Planner|Creator|Activities|Development)$/, ""))}</li>`).join("")}${ts.length > 5 ? `<li>+${ts.length - 5} more</li>` : ""}</ul>
+      <span class="t-open" style="color:${s.color}">${ts.length} tools ${SK.ICON.arrow}</span></a>`;
+  }).join("");
+
+  // Category grids
+  $$("[data-cat]").forEach((box) => {
+    const c = S.categories.find((x) => x.id === box.dataset.cat);
+    const ts = S.tools.filter((t) => t.cat === c.id);
+    box.innerHTML = (box.hasAttribute("data-flat") ? "" : `<div class="cat-title">${c.icon} ${c.name} <span class="count">${ts.length} tools</span></div>`) +
+      `<div class="tool-grid"${box.hasAttribute("data-flat") ? ' style="margin-top:18px"' : ""}>${ts.map(card).join("")}</div>`;
+  });
+
+  // Sound Friends entry points
+  $("#sfOpen").href = url(S.soundFriends.url);
+  $("#sfParts").innerHTML = S.soundFriends.parts.map((p) => `<a class="chip" style="text-decoration:none" href="${url(S.soundFriends.url)}#${p.hash}">${p.name}</a>`).join("");
+
+  // Search + filters
+  const filters = [{ id: "all", name: "All" }].concat(S.categories.map((c) => ({ id: c.id, name: c.name })));
+  let active = "all";
+  $("#filters").innerHTML = filters.map((f) => `<button class="chip${f.id === "all" ? " on" : ""}" data-f="${f.id}">${f.name}</button>`).join("");
+  const norm = (s) => s.toLowerCase();
+  function run() {
+    const q = norm($("#q").value.trim());
+    const res = $("#results");
+    if (!q && active === "all") { res.hidden = true; return; }
+    const words = q.split(/\s+/).filter(Boolean);
+    const list = S.tools.filter((t) => (active === "all" || t.cat === active) &&
+      words.every((w) => norm(t.name + " " + t.desc + " " + t.keys + " " + t.cat).includes(w)));
+    res.hidden = false;
+    res.innerHTML = list.length ? `<div class="tool-grid">${list.map(card).join("")}</div>`
+      : `<div class="no-results">No tools match "<b>${esc(q)}</b>". Try "plan", "game", "reading" or "write".</div>`;
+  }
+  $("#q").addEventListener("input", run);
+  $("#filters").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-f]"); if (!b) return;
+    active = b.dataset.f; $$("#filters .chip").forEach((x) => x.classList.toggle("on", x === b)); run();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "/" && !/input|textarea|select/i.test(document.activeElement.tagName)) { e.preventDefault(); $("#q").focus(); $("#search").scrollIntoView(); }
+  });
+  if (location.hash === "#search") setTimeout(() => $("#q").focus(), 300);
+
+  // Highlight nav link for the section in view
+  const navA = $$(".nav-links a, .mobile-nav a");
+  const io = new IntersectionObserver((ents) => ents.forEach((en) => {
+    if (!en.isIntersecting) return;
+    const id = en.target.id;
+    navA.forEach((a) => a.classList.toggle("active", a.getAttribute("href").endsWith("#" + id) || (id === "top" && a.getAttribute("href").endsWith("index.html"))));
+  }), { rootMargin: "-45% 0px -50% 0px" });
+  ["toolkit", "reading", "writing"].forEach((id) => io.observe(document.getElementById(id)));
+
+  // Content above was rendered by script, so land on the requested section again
+  if (location.hash.length > 1 && location.hash !== "#search") {
+    const t = document.getElementById(location.hash.slice(1));
+    if (t) setTimeout(() => t.scrollIntoView({ behavior: "instant" }), 60);
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson Plan Generator · Skillyfai</title>
+<link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<style>
+  .lp-form { max-width: 900px; margin: 18px auto 0; }
+  .lp-form .req { color: var(--danger); }
+  .field .err { color: var(--danger); font-size: .8rem; font-weight: 600; display: none; }
+  .field.invalid .err { display: block; }
+  .field.invalid .input, .field.invalid .select { border-color: var(--danger); box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 15%, transparent); }
+  .method-box { border: 1px solid var(--border); background: var(--surface-2); border-radius: 12px; padding: 12px 14px; font-size: .88rem; color: var(--muted); }
+  .method-box b { color: var(--text); }
+  .method-box .stages { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .gen-btn { width: 100%; margin-top: 8px; font-size: 1.05rem; padding: 15px; }
+  .spin { width: 18px; height: 18px; border: 3px solid rgba(255,255,255,.45); border-top-color: #fff; border-radius: 50%; animation: sp .7s linear infinite; display: none; }
+  .loading .spin { display: inline-block; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+  .lp-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: center; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 10px; position: sticky; top: 74px; z-index: 5; box-shadow: var(--shadow-sm); max-width: 900px; margin: 18px auto 12px; }
+  .lp-note { max-width: 900px; margin: 0 auto 12px; }
+
+  /* The lesson plan document (same structure on screen, in print and in the PDF) */
+  .lp-paper { background: #fff; color: #161616; max-width: 900px; margin: 0 auto; padding: 34px 36px; border-radius: 12px; box-shadow: var(--shadow); font-size: 14.5px; line-height: 1.5; color-scheme: light; }
+  .lp-paper h2 { text-align: center; font-size: 1.35rem; margin: 0 0 18px; color: #161616; letter-spacing: 0; }
+  .lp-sec { margin-bottom: 16px; }
+  .lp-sec h3 { font-size: 1rem; margin: 0 0 6px; color: #2e2e8a; letter-spacing: 0; }
+  .lp-sec h3 small { color: #666; font-weight: 600; font-size: .82rem; }
+  .lp-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .lp-t { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .lp-t th, .lp-t td { border: 1px solid #6b6b6b; padding: 7px 9px; vertical-align: top; text-align: left; overflow-wrap: break-word; }
+  .lp-t th { background: #eceefa; font-weight: 700; }
+  .lp-t td ul { margin: 0; padding-left: 16px; }
+  .lp-t td li { margin-bottom: 2px; }
+  .lp-t .min { display: block; color: #555; font-size: .82rem; margin-top: 2px; }
+  .lp-t td[contenteditable]:hover { background: #fffbe8; }
+  .lp-t td[contenteditable]:focus { outline: 2px solid #5b5bd6; background: #fffbe8; }
+  .lp-t.wide { min-width: 700px; }
+  .center-num { text-align: center !important; }
+  @media (max-width: 600px) { .lp-paper { padding: 20px 14px; font-size: 14px; border-radius: 8px; } .lp-actions { top: 70px; } .lp-actions .btn { padding: 8px 10px; font-size: .84rem; } }
+
+  @media print {
+    @page { size: A4; margin: 14mm; }
+    body.lp-page main > *:not(#lpResultWrap), .lp-actions, .lp-note { display: none !important; }
+    #lpResultWrap { padding: 0 !important; max-width: none !important; }
+    .lp-paper { box-shadow: none; padding: 0; max-width: none; border-radius: 0; font-size: 10.5pt; }
+    .lp-scroll { overflow: visible; }
+    .lp-t.wide { min-width: 0; }
+    .lp-t thead { display: table-header-group; }
+    .lp-t tr { break-inside: avoid; page-break-inside: avoid; }
+    .lp-sec h3 { break-after: avoid; page-break-after: avoid; }
+    .lp-t th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body data-root=".." data-page="toolkit" class="lp-page">
+<main>
+  <div id="tool-hero" data-tool="lesson-plan" data-sub="Enter a few details and get a complete, classroom-ready lesson plan in a neat nine-section table format. Print it or download it as a PDF."></div>
+
+  <div class="wrap" id="lpFormWrap">
+    <form class="panel lp-form" id="lpForm" novalidate autocomplete="off">
+      <div class="panel-head"><h2>Lesson details</h2><button type="button" class="btn btn-soft btn-sm" id="sampleBtn">Fill sample</button></div>
+      <div class="grid-2">
+        <div class="field"><label for="teacher">Name of the Teacher <span class="req">*</span></label><input class="input" id="teacher" placeholder="Enter teacher's name"><span class="err">Please enter the teacher's name.</span></div>
+        <div class="field"><label for="school">School Name <span class="req">*</span></label><input class="input" id="school" placeholder="Enter school name"><span class="err">Please enter the school name.</span></div>
+        <div class="field"><label for="subject">Subject <span class="req">*</span></label><input class="input" id="subject" list="subjects" placeholder="Choose or type a subject"><datalist id="subjects"></datalist><span class="hint">Pick from the list or type your own.</span><span class="err">Please choose or type a subject.</span></div>
+        <div class="field"><label for="grade">Grade / Class <span class="req">*</span></label><select class="select" id="grade"><option value="">Select class</option></select><span class="err">Please select a class.</span></div>
+      </div>
+      <div class="field"><label for="topic">Topic <span class="req">*</span></label><input class="input" id="topic" placeholder="Enter lesson topic"><span class="hint" id="topicHint"></span><span class="err">Please enter the lesson topic.</span></div>
+      <div class="field"><label for="duration">Duration <span class="req">*</span></label><select class="select" id="duration"></select><span class="err">Please select the duration.</span></div>
+      <div class="field"><label for="method">Teaching Method <span class="req">*</span></label><select class="select" id="method"></select>
+        <span class="hint">Chosen automatically from the class: GRR for Classes I–VIII, Hybrid (CLT + GTM) for Classes IX–XII.</span>
+        <div class="method-box" id="methodBox" style="margin-top:6px"></div></div>
+      <details style="margin:14px 0 4px">
+        <summary class="small" style="cursor:pointer;font-weight:700">More options (optional)</summary>
+        <div class="field" style="margin-top:10px"><label for="keywords">Key words or key points</label>
+          <input class="input" id="keywords" placeholder="e.g. evaporation, condensation, rain">
+          <span class="hint">Separate with commas. Recommended for topics not in Skillyfai's topic library and for textbook lessons, so the plan uses your exact words.</span></div>
+      </details>
+      <button type="submit" class="btn btn-primary btn-lg gen-btn" id="genBtn"><span class="spin" aria-hidden="true"></span><span id="genTxt">✨ Generate Lesson Plan</span></button>
+      <p class="small muted center" style="margin:10px 0 0">Plans are created by Skillyfai's built-in lesson templates and topic library. No AI service is used. Please read the plan and adjust it for your class.</p>
+    </form>
+  </div>
+
+  <div class="wrap" id="lpResultWrap" hidden>
+    <div class="lp-actions" role="toolbar" aria-label="Lesson plan actions">
+      <button class="btn btn-ghost btn-sm" id="editBtn">✏️ Edit Details</button>
+      <button class="btn btn-ghost btn-sm" id="regenBtn">🔄 Regenerate</button>
+      <button class="btn btn-ghost btn-sm" id="printBtn">🖨️ Print Lesson Plan</button>
+      <button class="btn btn-primary btn-sm" id="pdfBtn">⬇️ Download PDF</button>
+      <button class="btn btn-ghost btn-sm" id="copyBtn">📋 Copy Lesson Plan</button>
+    </div>
+    <div class="note lp-note" id="lpNote"></div>
+    <article class="lp-paper" id="lpDoc" aria-live="polite"></article>
+  </div>
+
+  <div id="related" data-tool="lesson-plan"></div>
+</main>
+<script src="../assets/js/catalog.js"></script>
+<script src="../assets/js/core.js"></script>
+<script src="../assets/js/lesson-plan/topics.js"></script>
+<script src="../assets/js/lesson-plan/engine.js"></script>
+<script src="../assets/js/lesson-plan/output.js"></script>
+<script>
+(function () {
+  const { $, $$, esc, store, toast } = SK;
+  const E = SKLessonEngine, OUT = SKLessonOutput;
+  const FIELDS = ["teacher", "school", "subject", "grade", "topic", "duration", "method", "keywords"];
+  const SAMPLE = { teacher: "Prem Gupta", school: "Maniram Dewan LPS", subject: "English", grade: "Class II", topic: "Festival", duration: "40", method: "grr", keywords: "" };
+
+  // Fill the option lists from the engine (one place to extend classes, subjects, durations)
+  $("#subjects").innerHTML = E.SUBJECTS.concat(["Other"]).map((s) => `<option value="${esc(s)}">`).join("");
+  $("#grade").innerHTML += E.GRADES.map((g) => `<option>${g}</option>`).join("");
+  $("#duration").innerHTML = E.DURATIONS.map((d) => `<option value="${d}" ${d === 40 ? "selected" : ""}>${d} minutes</option>`).join("");
+  // Two teaching methods are offered: GRR (Classes I–VIII) and Hybrid CLT + GTM (Classes IX–XII)
+  $("#method").innerHTML = ["grr", "hybrid"].map((k) => `<option value="${k}">${esc(E.METHODS[k].name)}</option>`).join("");
+  function paintMethod() {
+    const m = E.METHODS[$("#method").value];
+    $("#methodBox").innerHTML = `<b>${esc(m.name)}</b>: ${esc(m.desc)}<div class="stages">${m.stages.map((s) => `<span class="badge">${esc(s.replace(/^Step \d: /, ""))}</span>`).join("")}</div>`;
+  }
+  // The method follows the class: pick a class and the method changes with it
+  function syncMethod() { const m = E.methodForGrade($("#grade").value); if (m) $("#method").value = m; paintMethod(); }
+
+  const read = () => Object.fromEntries(FIELDS.map((k) => [k, $("#" + k).value.trim()]));
+  const write = (v) => FIELDS.forEach((k) => { if (v[k] != null) $("#" + k).value = v[k]; });
+  function validate(v) {
+    let first = null;
+    ["teacher", "school", "subject", "grade", "topic", "duration"].forEach((k) => {
+      const bad = !v[k] || (k === "subject" && v[k].toLowerCase() === "other");
+      const f = $("#" + k).closest(".field"); f.classList.toggle("invalid", bad);
+      if (k === "subject") f.querySelector(".err").textContent = v[k].toLowerCase() === "other" ? "Please type the name of your subject." : "Please choose or type a subject.";
+      if (bad && !first) first = $("#" + k);
+    });
+    if (first) { first.focus(); first.scrollIntoView({ block: "center", behavior: "smooth" }); }
+    return !first;
+  }
+  $("#lpForm").addEventListener("input", (e) => { const f = e.target.closest(".field"); if (f) f.classList.remove("invalid"); store.set("lp:input", read()); });
+  $("#grade").addEventListener("change", syncMethod);
+  $("#method").addEventListener("change", paintMethod);
+  $("#sampleBtn").onclick = () => { write(SAMPLE); syncMethod(); $$(".field.invalid").forEach((f) => f.classList.remove("invalid")); store.set("lp:input", read()); };
+
+  let seed = 0, last = null;
+  function generate(newSeed) {
+    const v = read();
+    if (!validate(v)) { toast("Please fill in all the required details"); return; }
+    seed = newSeed;
+    const btns = [$("#genBtn"), $("#regenBtn")];
+    $("#genBtn").classList.add("loading"); $("#genTxt").textContent = "Preparing your lesson plan…"; btns.forEach((b) => (b.disabled = true));
+    if (!$("#lpResultWrap").hidden) $("#lpDoc").style.opacity = ".35";
+    setTimeout(() => {
+      try {
+        const plan = E.generate(v, seed);
+        last = { v, plan };
+        $("#lpDoc").innerHTML = OUT.html(plan);
+        OUT.makeEditable($("#lpDoc"));
+        $("#lpNote").innerHTML = (plan.matched ? `✅ Built with topic-specific content for <b>${esc(plan.details[4][1])}</b>.`
+          : `ℹ️ <b>${esc(plan.details[4][1])}</b> is not in Skillyfai's topic library yet, so the plan uses a general structure for ${esc(v.subject)}. ${v.keywords ? "Your key words have been used." : "Add key words under <b>More options</b> for a more specific plan."}`)
+          + " You can click any table cell to edit it before printing or downloading.";
+        $("#lpFormWrap").hidden = true; $("#lpResultWrap").hidden = false;
+        store.set("lp:input", v);
+        window.scrollTo({ top: $("#lpResultWrap").offsetTop - 70, behavior: "smooth" });
+      } catch (err) {
+        console.error(err);
+        if (err.fields) validate(v); else toast("Sorry, the lesson plan could not be generated. Please check the details and try again.");
+      } finally {
+        $("#genBtn").classList.remove("loading"); $("#genTxt").textContent = "✨ Generate Lesson Plan"; btns.forEach((b) => (b.disabled = false)); $("#lpDoc").style.opacity = "";
+      }
+    }, 450);
+  }
+  $("#lpForm").addEventListener("submit", (e) => { e.preventDefault(); generate(0); });
+  $("#regenBtn").onclick = () => generate(seed + 1);
+  $("#editBtn").onclick = () => { $("#lpResultWrap").hidden = true; $("#lpFormWrap").hidden = false; window.scrollTo({ top: 0, behavior: "smooth" }); $("#topic").focus({ preventScroll: true }); };
+  $("#printBtn").onclick = () => window.print();
+  $("#copyBtn").onclick = () => OUT.copy($("#lpDoc"));
+  $("#pdfBtn").onclick = async () => {
+    const b = $("#pdfBtn"), t = b.textContent; b.disabled = true; b.textContent = "Preparing PDF…";
+    try { await OUT.pdf($("#lpDoc"), last.plan); } catch (e) { console.error(e); toast("PDF download needs an internet connection the first time. Opening Print instead: choose “Save as PDF”."); setTimeout(() => window.print(), 600); }
+    finally { b.disabled = false; b.textContent = t; }
+  };
+
+  write(store.get("lp:input", {})); syncMethod();
+})();
+</script>
+</body>
+</html>

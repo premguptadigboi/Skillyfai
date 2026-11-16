@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handwriting Practice · Skillyfai</title>
+<link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Andika:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<style>
+  .sheet { background: #fff; color: #222; border-radius: 6px; padding: 28px 30px; box-shadow: var(--shadow); max-width: 794px; margin: 0 auto; }
+  .sheet-head { display: flex; justify-content: space-between; gap: 12px; font-family: var(--font-kid); font-size: 1rem; margin-bottom: 6px; flex-wrap: wrap; }
+  .sheet h2 { font-family: var(--font-kid); color: #222; text-align: center; font-size: 1.5rem; margin: 6px 0 16px; }
+  .sheet .foot { text-align: center; font-size: .75rem; color: #888; margin-top: 12px; }
+  @media print { .sheet { box-shadow: none; padding: 0; max-width: none; } }
+</style>
+</head>
+<body data-root=".." data-page="writing">
+<main>
+  <div id="tool-hero" data-tool="handwriting"></div>
+  <div class="wrap split">
+    <div class="sticky no-print">
+      <div class="panel">
+        <h2>Worksheet settings</h2>
+        <div class="field"><label for="preset">Quick start</label>
+          <select class="select" id="preset"><option value="">Choose a ready set…</option><option>Capital letters A–Z</option><option>Small letters a–z</option><option>Numbers 1–10</option><option>Number names</option><option>Days of the week</option><option>Months of the year</option><option>Colour words</option><option>Simple sentences</option><option>Good habits</option></select></div>
+        <div class="field"><label for="title">Title</label><input class="input" id="title" value="My Handwriting Practice"></div>
+        <div class="field"><label for="text">Text to practise (one item per line)</label><textarea class="textarea" id="text" rows="7"></textarea></div>
+        <div class="grid-2">
+          <div class="field"><label for="mode">Style</label><select class="select" id="mode"><option value="trace">Trace only</option><option value="model">Model + trace + blank</option><option value="copy">Model + blank lines</option></select></div>
+          <div class="field"><label for="rep">Repeat each line</label><select class="select" id="rep"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div>
+          <div class="field"><label for="size">Size</label><select class="select" id="size"><option value="96">Large (beginners)</option><option value="74" selected>Medium</option><option value="56">Small</option></select></div>
+          <div class="field"><label for="spread">Letters</label><select class="select" id="spread"><option value="no">As typed</option><option value="yes">Repeat across the line</option></select></div>
+        </div>
+        <label class="check"><input type="checkbox" id="head" checked> <span>Name and date line</span></label>
+        <div class="row" style="margin-top:14px"><button class="btn btn-primary" id="print">🖨 Print worksheet</button></div>
+        <p class="small muted" style="margin:10px 0 0">Tip: in the print window choose “A4” and turn off headers and footers.</p>
+      </div>
+    </div>
+    <div id="out"><div class="sheet" id="sheet"></div></div>
+  </div>
+  <div id="related" data-tool="handwriting"></div>
+</main>
+<script src="../assets/js/catalog.js"></script>
+<script src="../assets/js/core.js"></script>
+<script src="../assets/js/writing.js"></script>
+<script>
+(function () {
+  const { $, esc, store, printEl } = SK;
+  const PRE = {
+    "Capital letters A–Z": "A B C D E F G\nH I J K L M N\nO P Q R S T U\nV W X Y Z",
+    "Small letters a–z": "a b c d e f g\nh i j k l m n\no p q r s t u\nv w x y z",
+    "Numbers 1–10": "1 2 3 4 5\n6 7 8 9 10",
+    "Number names": "one two three\nfour five six\nseven eight nine\nten",
+    "Days of the week": "Monday Tuesday\nWednesday Thursday\nFriday Saturday\nSunday",
+    "Months of the year": "January February\nMarch April May\nJune July August\nSeptember October\nNovember December",
+    "Colour words": "red blue green\nyellow orange pink\nblack white brown",
+    "Simple sentences": "I love my family.\nThe sun is bright.\nWe play together.\nBirds sing in the morning.",
+    "Good habits": "Wash your hands.\nBrush your teeth.\nSay thank you.\nKeep your class clean."
+  };
+  const IDS = ["title", "text", "mode", "rep", "size", "spread"];
+  const saved = store.get("hw:settings", null);
+  if (saved) IDS.forEach((k) => { if (saved[k] != null) $("#" + k).value = saved[k]; }); else $("#text").value = PRE["Capital letters A–Z"];
+  function render() {
+    const size = +$("#size").value, chars = Math.round(1000 / (size * 0.55) * 1.25);
+    let lines = $("#text").value.split("\n").map((s) => s.trim()).filter(Boolean);
+    if ($("#spread").value === "yes") lines = lines.map((l) => { const unit = l + "   "; return unit.repeat(Math.max(1, Math.floor(chars / unit.length))).trim(); });
+    lines = [].concat(...lines.map((l) => SKSheet.fit(l, chars)));
+    $("#sheet").innerHTML = `${$("#head").checked ? '<div class="sheet-head"><span>Name: ____________________</span><span>Date: ____________</span></div>' : ""}
+      <h2>${esc($("#title").value)}</h2>${SKSheet(lines, { mode: $("#mode").value, repeat: +$("#rep").value, rowH: size })}<div class="foot">Made with Skillyfai</div>`;
+    store.set("hw:settings", Object.fromEntries(IDS.map((k) => [k, $("#" + k).value])));
+  }
+  $("#preset").onchange = (e) => { if (PRE[e.target.value]) { $("#text").value = PRE[e.target.value]; $("#title").value = e.target.value; render(); } };
+  document.querySelector(".sticky").addEventListener("input", render);
+  document.querySelector(".sticky").addEventListener("change", render);
+  $("#print").onclick = () => printEl($("#out"));
+  (document.fonts ? document.fonts.load("700 40px Andika") : Promise.resolve()).finally(render);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classroom Question Generator · Skillyfai</title>
+<link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body data-root=".." data-page="toolkit">
+<main>
+  <div id="tool-hero" data-tool="question-generator" data-sub="Enter a topic and its key words. Get questions at every thinking level, from simple recall to creative thinking. Edit and print them as a worksheet."></div>
+  <div id="planner"></div>
+  <div id="related" data-tool="question-generator"></div>
+</main>
+<script src="../assets/js/catalog.js"></script>
+<script src="../assets/js/core.js"></script>
+<script src="../assets/js/planner.js"></script>
+<script>
+/* Template-based question builder (works offline, no AI service). {t} = topic, {k} = key word */
+const Q = {
+  "Recall": ["What is {k}?", "Name two examples of {k}.", "Define {k} in one sentence.", "List three facts about {t}.", "Where do we find {k}?", "Who or what is related to {k}?"],
+  "Understanding": ["Explain {k} in your own words.", "Why is {k} important in {t}?", "What is the difference between {k} and {k2}?", "Give an everyday example of {k}.", "Describe how {k} is connected to {t}.", "What would you tell a younger child about {k}?"],
+  "Application": ["How can you use what you learned about {k} at home?", "Where do you see {k} in your village, town or city?", "Solve a problem using {k}: make up a short example and solve it.", "How would you show {k} to the class using simple objects?", "What steps would you follow to use {k}?"],
+  "Analysis": ["How are {k} and {k2} alike? How are they different?", "What might happen if there were no {k}?", "Sort these into groups and explain your groups: {all}.", "What are the causes and effects of {k}?", "Which part of {t} is the most important? Why?"],
+  "Evaluation": ["Do you agree that {k} is useful? Give reasons.", "Which is better, {k} or {k2}? Explain your choice.", "What would you change about {t} and why?", "How could we check whether an idea about {k} is true?"],
+  "Creative": ["Imagine a world without {k}. Write three things that would change.", "Create a poster, poem or slogan about {k}.", "Design a game that teaches {t} to younger children.", "Write a short story in which {k} plays an important role.", "Invent a new question about {t} that nobody has asked yet."]
+};
+let seed = 0;
+const rot = (a, n) => a.slice(n % a.length).concat(a.slice(0, n % a.length));
+SKPlanner({
+  key: "questions", noun: "question set",
+  emptyText: "Enter a topic and a few key words to generate questions.", emptyIcon: "❓",
+  title: (v) => "Questions: " + (v.topic || "topic"),
+  fields: [
+    { id: "topic", label: "Topic", placeholder: "e.g. Our solar system" },
+    { id: "subject", label: "Subject", half: true, placeholder: "e.g. Science" },
+    { id: "cls", label: "Class", half: true, placeholder: "e.g. Class 6" },
+    { id: "keys", label: "Key words or concepts (one per line)", type: "lines", rows: 4, placeholder: "planet\norbit\nsun\nmoon", hint: "More key words give more varied questions." },
+    { id: "levels", label: "Thinking levels", type: "checks", options: Object.keys(Q), value: ["Recall", "Understanding", "Application", "Analysis"], ignoreEmpty: true },
+    { id: "per", label: "Questions per level", type: "select", options: ["2", "3", "4", "5"], value: "3", half: true, ignoreEmpty: true },
+    { id: "format", label: "Format", type: "select", options: ["Teacher's question list", "Student worksheet (with answer lines)"], half: true, ignoreEmpty: true }
+  ],
+  example: { topic: "Our solar system", subject: "Science", cls: "Class 6", keys: ["planet", "orbit", "sun", "moon", "gravity"], levels: ["Recall", "Understanding", "Application", "Analysis", "Creative"], per: "3" },
+  actions: [{ label: "↻ New questions", run: (c) => { seed++; c.render(); } }],
+  render(v, H) {
+    const t = v.topic || "the topic";
+    const keys = v.keys.length ? v.keys : [t];
+    const lv = v.levels.length ? v.levels : ["Recall", "Understanding"];
+    const n = +v.per || 3, sheet = /worksheet/i.test(v.format);
+    let num = 0;
+    const blocks = lv.map((L, li) => {
+      const temps = rot(Q[L], seed + li), qs = [], seen = new Set();
+      for (let i = 0; qs.length < n && i < temps.length * keys.length; i++) {
+        const k = keys[(i + seed) % keys.length], k2 = keys[(i + seed + 1) % keys.length] || t;
+        const q = temps[i % temps.length].replace("{t}", t).replace(/\{k\}/g, k).replace("{k2}", k2 === k ? t : k2).replace("{all}", keys.join(", "));
+        if (!seen.has(q)) { seen.add(q); qs.push(q); }
+      }
+      return `<h3>${L}</h3><ol start="${num + 1}">${qs.map((q) => { num++; return `<li>${H.esc(q)}${sheet ? '<div style="border-bottom:1px solid #bbb;height:26px"></div><div style="border-bottom:1px solid #bbb;height:26px;margin-bottom:6px"></div>' : ""}</li>`; }).join("")}</ol>`;
+    }).join("");
+    return `<h2>${H.esc(t)}</h2><div class="muted">${H.esc([v.subject, v.cls].filter(Boolean).join(" · "))}${sheet ? "" : " · " + num + " questions"}</div>
+      ${sheet ? '<div class="meta"><div><b>Name</b>______________</div><div><b>Class</b>________</div><div><b>Date</b>________</div></div>' : ""}
+      ${blocks}
+      ${sheet ? "" : '<p class="small muted" style="margin-top:16px">Questions are built from templates, so read them once and edit any that do not fit your topic (use Copy or Word).</p>'}`;
+  }
+});
+</script>
+</body>
+</html>

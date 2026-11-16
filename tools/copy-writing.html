@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Copy Writing Activities · Skillyfai</title>
+<link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Andika:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<style>
+  .model { font-family: var(--font-kid); font-size: clamp(1.3rem, 2.8vw, 1.8rem); line-height: 1.9; background: #fffdf7; color: #222; border-radius: 16px; padding: 18px 22px; border: 2px solid var(--border); }
+  .model .c { border-radius: 4px; }
+  .model .c.ok { color: var(--success); }
+  .model .c.bad { background: color-mix(in srgb, var(--danger) 25%, transparent); }
+  .model .c.cur { box-shadow: inset 0 -3px 0 var(--primary); }
+  .copybox { font-family: var(--font-kid); font-size: clamp(1.2rem, 2.6vw, 1.6rem); width: 100%; min-height: 130px; padding: 14px 18px; border-radius: 16px; border: 2px solid var(--border-strong); background: var(--surface); color: var(--text); line-height: 1.8; margin-top: 14px; }
+  .sheet { background: #fff; color: #222; border-radius: 6px; padding: 26px; box-shadow: var(--shadow); }
+  .sheet h2 { font-family: var(--font-kid); text-align: center; color: #222; }
+  @media print { .sheet { box-shadow: none; padding: 0; } }
+</style>
+</head>
+<body data-root=".." data-page="writing">
+<main>
+  <div id="tool-hero" data-tool="copy-writing"></div>
+  <div class="wrap" style="margin-top:14px">
+    <div class="row" style="margin-bottom:14px">
+      <div class="chips" id="cats"></div><span class="spacer"></span>
+      <div class="seg" id="mode"><button data-m="screen" class="on">⌨️ Copy on screen</button><button data-m="paper">🖨 Copy on paper</button></div>
+    </div>
+    <div class="panel" style="margin-bottom:14px">
+      <div class="row"><select class="select" id="item" style="flex:1;min-width:200px" aria-label="Choose a text"></select><button class="btn btn-ghost btn-sm" id="listen">🔊 Listen</button><button class="btn btn-ghost btn-sm" id="nextItem">Next ➜</button></div>
+      <details style="margin-top:10px"><summary class="small" style="cursor:pointer;font-weight:700">Use my own text</summary>
+        <textarea class="textarea" id="own" rows="3" style="margin-top:8px" placeholder="Type or paste the text children should copy"></textarea>
+        <button class="btn btn-soft btn-sm" id="useOwn" style="margin-top:6px">Use this text</button></details>
+    </div>
+
+    <div id="v-screen" class="kid-card kid">
+      <div class="row" style="justify-content:space-between;font-family:var(--font);margin-bottom:10px"><b>Look, read, then copy it below.</b><span class="row"><span class="badge" id="acc">Accuracy –</span><span class="badge" id="tm">0:00</span></span></div>
+      <div class="model" id="model"></div>
+      <textarea class="copybox" id="copy" spellcheck="false" autocomplete="off" placeholder="Start copying here…" aria-label="Copy the text"></textarea>
+      <p class="center" id="msg" style="min-height:30px;font-weight:700;margin:10px 0 0;font-family:var(--font)"></p>
+    </div>
+
+    <div id="v-paper" hidden>
+      <div class="panel no-print" style="margin-bottom:14px"><div class="row"><label class="small"><b>Blank lines after each line</b></label>
+        <select class="select" id="blank" style="width:auto"><option>1</option><option selected>2</option><option>3</option></select>
+        <label class="small"><b>Size</b></label><select class="select" id="size" style="width:auto"><option value="84">Large</option><option value="66" selected>Medium</option><option value="52">Small</option></select>
+        <span class="spacer"></span><button class="btn btn-primary btn-sm" id="print">🖨 Print</button></div></div>
+      <div id="paperOut"><div class="sheet" id="sheet"></div></div>
+    </div>
+  </div>
+  <div id="related" data-tool="copy-writing"></div>
+</main>
+<script src="../assets/js/catalog.js"></script>
+<script src="../assets/js/core.js"></script>
+<script src="../assets/js/writing.js"></script>
+<script>
+(function () {
+  const { $, $$, esc, store, speak, celebrate, printEl, toast } = SK;
+  const BANK = {
+    "Words": ["apple ball cat dog egg", "red blue green yellow", "mother father sister brother", "school teacher friend book"],
+    "Sentences": ["I go to school.", "The sky is blue.", "My cat drinks milk.", "We wash our hands before eating.", "The children are playing in the garden."],
+    "Short passages": [
+      "My name is Asha. I live in a small village. There is a big tree near my house. Birds sing on it every morning.",
+      "Our school has a library. We go there every Friday. I like books about animals. My favourite book is about a clever fox.",
+      "Water is very important. We need it to drink, cook and clean. Plants and animals also need water. We must not waste it."
+    ],
+    "Rhymes": [
+      "Little drops of rain,\nTapping on the pane,\nPlants are drinking deep,\nWaking from their sleep.",
+      "One, two, tie my shoe,\nThree, four, open the door,\nFive, six, pick up sticks,\nSeven, eight, stand up straight."
+    ],
+    "Good thoughts": ["Always speak the truth.", "Be kind to animals.", "Keep your surroundings clean.", "Practice makes perfect.", "Help others when you can."]
+  };
+  let cat = store.get("cw:cat", "Sentences"), idx = 0, text = "", t0 = 0, timer = null, mode = "screen";
+  if (store.get("cw:own", "")) BANK["My text"] = [store.get("cw:own", "")];
+
+  function paintCats() { $("#cats").innerHTML = Object.keys(BANK).map((k) => `<button class="chip ${k === cat ? "on" : ""}" data-c="${esc(k)}">${esc(k)}</button>`).join(""); }
+  function paintItems() { $("#item").innerHTML = BANK[cat].map((t, i) => `<option value="${i}">${esc(t.replace(/\n/g, " / ").slice(0, 70))}${t.length > 70 ? "…" : ""}</option>`).join(""); $("#item").value = idx; }
+  function load() {
+    text = BANK[cat][idx]; $("#copy").value = ""; $("#msg").textContent = ""; clearInterval(timer); t0 = 0; $("#tm").textContent = "0:00"; $("#acc").textContent = "Accuracy –";
+    paintModel(""); paintSheet();
+  }
+  function paintModel(v) {
+    let html = "";
+    for (let j = 0; j < text.length; j++) {
+      const c = text[j], cls = j < v.length ? (v[j] === c || (c === "\n" && v[j] === " ") ? "ok" : "bad") : j === v.length ? "cur" : "";
+      html += c === "\n" ? "<br>" : `<span class="c ${cls}">${c === " " ? "&nbsp;" : esc(c)}</span>`;
+    }
+    $("#model").innerHTML = html;
+  }
+  $("#copy").oninput = () => {
+    const v = $("#copy").value.replace(/\r/g, "");
+    if (!t0 && v) { t0 = Date.now(); timer = setInterval(() => { const s = Math.floor((Date.now() - t0) / 1000); $("#tm").textContent = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }, 500); }
+    paintModel(v);
+    const n = Math.min(v.length, text.length); let ok = 0; for (let j = 0; j < n; j++) if (v[j] === text[j] || (text[j] === "\n" && v[j] === " ")) ok++;
+    const acc = n ? Math.round((ok / n) * 100) : 0; $("#acc").textContent = "Accuracy " + acc + "%";
+    if (v.length >= text.length) { clearInterval(timer);
+      if (acc === 100) { $("#msg").innerHTML = '<span style="color:var(--success)">🌟 Perfect copy! Every letter is right.</span>'; celebrate(); speak("Perfect copy!"); }
+      else $("#msg").innerHTML = `<span style="color:var(--amber)">Finished with ${acc}% accuracy. Look at the red letters and fix them.</span>`; }
+  };
+  function paintSheet() {
+    const size = +$("#size").value, chars = Math.round(1000 / (size * 0.55) * 1.25);
+    const lines = [].concat(...text.split("\n").map((l) => SKSheet.fit(l, chars)));
+    $("#sheet").innerHTML = `<div class="row" style="justify-content:space-between;font-family:var(--font-kid)"><span>Name: ________________</span><span>Date: __________</span></div>
+      <h2>Copy writing: ${esc(cat)}</h2>${SKSheet(lines, { mode: "copy", repeat: +$("#blank").value, rowH: size })}`;
+  }
+  $("#cats").onclick = (e) => { const b = e.target.closest("[data-c]"); if (!b) return; cat = b.dataset.c; idx = 0; store.set("cw:cat", cat); paintCats(); paintItems(); load(); };
+  $("#item").onchange = (e) => { idx = +e.target.value; load(); };
+  $("#nextItem").onclick = () => { idx = (idx + 1) % BANK[cat].length; $("#item").value = idx; load(); };
+  $("#listen").onclick = () => speak(text.replace(/\n/g, ". "), { rate: .8 });
+  $("#useOwn").onclick = () => { const t = $("#own").value.trim(); if (!t) return toast("Type some text first"); BANK["My text"] = [t]; store.set("cw:own", t); cat = "My text"; idx = 0; paintCats(); paintItems(); load(); };
+  $("#mode").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; mode = b.dataset.m; $$("#mode button").forEach((x) => x.classList.toggle("on", x === b)); $("#v-screen").hidden = mode !== "screen"; $("#v-paper").hidden = mode !== "paper"; };
+  $("#blank").onchange = paintSheet; $("#size").onchange = paintSheet;
+  $("#print").onclick = () => printEl($("#paperOut"));
+  if (!BANK[cat]) cat = "Sentences";
+  paintCats(); paintItems(); load();
+})();
+</script>
+</body>
+</html>

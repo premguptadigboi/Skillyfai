@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Word Writing Practice · Skillyfai</title>
+<link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Andika:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+<style>
+  .steps3 { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .steps3 button { font-family: var(--font-kid); font-weight: 700; font-size: 1rem; padding: 8px 16px; border-radius: 999px; border: 2px solid var(--border); background: var(--surface); cursor: pointer; color: var(--muted); }
+  .steps3 button.on { border-color: var(--coral); background: var(--coral-soft); color: var(--coral); }
+  .pic { font-size: 4rem; text-align: center; line-height: 1; min-height: 4rem; }
+  .spell { display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+  .spell input { font-family: var(--font-kid); font-size: 1.6rem; text-align: center; width: 220px; padding: 8px 12px; border-radius: 14px; border: 2px solid var(--border-strong); background: var(--surface); }
+  .tools { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 16px; }
+</style>
+</head>
+<body data-root=".." data-page="writing">
+<main>
+  <div id="tool-hero" data-tool="word-writing"></div>
+  <div class="wrap" style="margin-top:14px">
+    <div class="row" style="margin-bottom:14px"><div class="chips" id="lists"></div></div>
+    <div class="kid-card kid">
+      <div class="row" style="justify-content:space-between"><span class="badge" id="pos" style="font-family:var(--font)"></span><span class="stars-bar">⭐ <span id="total">0</span></span></div>
+      <div class="pic" id="pic"></div>
+      <div class="steps3" id="steps"><button data-s="1" class="on">1 · Listen &amp; trace</button><button data-s="2">2 · Write from memory</button><button data-s="3">3 · Type the spelling</button></div>
+      <div id="pad"></div>
+      <div class="spell" id="spellBox" hidden><input id="spell" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Type the word"><button class="kid-btn mint" id="spellCheck">Check</button></div>
+      <p class="center" id="msg" style="min-height:30px;font-weight:700;margin:12px 0 0"></p>
+      <div class="tools">
+        <button class="kid-btn" id="say">🔊 Listen</button>
+        <button class="kid-btn ghost" id="peek">👀 Show word</button>
+        <button class="kid-btn ghost" id="undo">↶ Undo</button>
+        <button class="kid-btn ghost" id="clear">🧽 Clear</button>
+        <button class="kid-btn mint" id="check">✔ Check</button>
+        <button class="kid-btn coral" id="next">Next word ➜</button>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <div class="field" style="margin:0"><label for="mine">My own words (comma separated). They appear as "My words".</label><input class="input" id="mine" placeholder="e.g. school, teacher, garden"></div>
+    </div>
+  </div>
+  <div id="related" data-tool="word-writing"></div>
+</main>
+<script src="../assets/js/catalog.js"></script>
+<script src="../assets/js/core.js"></script>
+<script src="../assets/js/writing.js"></script>
+<script>
+(function () {
+  const { $, $$, esc, store, speak, celebrate, toast, shuffle } = SK;
+  const LISTS = {
+    "3-letter words": [["cat", "🐱"], ["sun", "☀️"], ["hat", "🎩"], ["bus", "🚌"], ["pen", "🖊️"], ["cup", "☕"], ["dog", "🐶"], ["pig", "🐷"], ["bed", "🛏️"], ["fan", "🪭"], ["box", "📦"], ["hen", "🐔"]],
+    "4-letter words": [["fish", "🐟"], ["ship", "🚢"], ["frog", "🐸"], ["milk", "🥛"], ["tree", "🌳"], ["star", "⭐"], ["book", "📘"], ["duck", "🦆"], ["kite", "🪁"], ["cake", "🎂"], ["rain", "🌧️"], ["moon", "🌙"]],
+    "Sight words": [["the"], ["and"], ["was"], ["said"], ["they"], ["have"], ["come"], ["what"], ["were"], ["there"], ["where"], ["because"]],
+    "Longer words": [["apple", "🍎"], ["tiger", "🐯"], ["water", "💧"], ["school", "🏫"], ["flower", "🌸"], ["rabbit", "🐰"], ["pencil", "✏️"], ["mango", "🥭"], ["garden", "🏡"], ["friend", "🧑‍🤝‍🧑"]]
+  };
+  const lists = () => { const m = store.get("ww:mine", "").split(",").map((s) => s.trim()).filter(Boolean); const L = Object.assign({}, LISTS); if (m.length) L["My words"] = m.map((w) => [w]); return L; };
+  let list = store.get("ww:list", "3-letter words"), order = [], i = 0, step = 1, total = store.get("ww:stars", 0);
+  const pad = SKTrace($("#pad"), { text: "" });
+  const word = () => order[i][0];
+
+  function paintLists() { const L = lists(); if (!L[list]) list = "3-letter words"; $("#lists").innerHTML = Object.keys(L).map((k) => `<button class="chip ${k === list ? "on" : ""}" data-l="${esc(k)}">${esc(k)}</button>`).join(""); }
+  function build() { order = shuffle(lists()[list]); i = 0; show(); }
+  function setStep(s) {
+    step = s; $$("#steps button").forEach((b) => b.classList.toggle("on", +b.dataset.s === s));
+    $("#pad").hidden = s === 3; $("#spellBox").hidden = s !== 3; $("#check").hidden = s === 3; $("#undo").hidden = $("#clear").hidden = s === 3;
+    pad.setText(word()); pad.setGuide(s === 1); $("#msg").textContent = "";
+    $("#pic").style.visibility = "visible";
+    if (s === 3) { $("#spell").value = ""; $("#spell").focus(); }
+    if (s >= 2) speak(word(), { rate: .75 });
+  }
+  function show() {
+    $("#pos").textContent = `${list} · ${i + 1} / ${order.length}`; $("#total").textContent = total;
+    $("#pic").textContent = order[i][1] || "📝"; setStep(1);
+    setTimeout(() => speak(word(), { rate: .75 }), 200);
+  }
+  function star(n) { total += n; store.set("ww:stars", total); $("#total").textContent = total; }
+  $("#lists").onclick = (e) => { const b = e.target.closest("[data-l]"); if (!b) return; list = b.dataset.l; store.set("ww:list", list); paintLists(); build(); };
+  $("#steps").onclick = (e) => { const b = e.target.closest("button"); if (b) setStep(+b.dataset.s); };
+  $("#say").onclick = () => speak(word(), { rate: .75 });
+  $("#peek").onclick = () => { if (step === 3) { $("#msg").textContent = word(); setTimeout(() => ($("#msg").textContent = ""), 1500); } else { pad.reveal(true); setTimeout(() => pad.setGuide(step === 1), 1500); } };
+  $("#undo").onclick = () => pad.undo(); $("#clear").onclick = () => pad.clear();
+  $("#check").onclick = () => {
+    if (!pad.hasInk()) return toast("Write the word first");
+    const r = pad.check();
+    if (step === 1) {
+      $("#msg").textContent = "⭐".repeat(r.stars) + "☆".repeat(3 - r.stars) + (r.stars >= 2 ? "  Now try it from memory!" : "  Trace all the letters.");
+      if (r.stars >= 2) { star(1); setTimeout(() => setStep(2), 1200); }
+    } else {
+      pad.reveal(true);
+      $("#msg").textContent = "Compare your writing with the dotted word. Does it match?";
+      $("#msg").innerHTML += ' <button class="btn btn-soft btn-sm" id="yes" style="font-family:var(--font)">Yes, it matches</button>';
+    }
+  };
+  $("#msg").addEventListener("click", (e) => { if (e.target.id === "yes") { star(2); celebrate(); speak("Well done!"); setTimeout(() => setStep(3), 900); } });
+  function spellCheck() {
+    const v = $("#spell").value.trim().toLowerCase();
+    if (!v) return;
+    if (v === word().toLowerCase()) { star(2); $("#msg").innerHTML = '<span style="color:var(--success)">✔ Perfect spelling!</span>'; celebrate(); speak("Perfect!"); setTimeout(() => $("#next").click(), 1600); }
+    else { $("#msg").innerHTML = `<span style="color:var(--amber)">Almost! ${[...word()].map((c, j) => v[j] === c.toLowerCase() ? `<b style="color:var(--success)">${c}</b>` : "_").join(" ")}</span>`; $("#spellBox").classList.add("shake"); setTimeout(() => $("#spellBox").classList.remove("shake"), 400); }
+  }
+  $("#spellCheck").onclick = spellCheck; $("#spell").onkeydown = (e) => { if (e.key === "Enter") spellCheck(); };
+  $("#next").onclick = () => { i = (i + 1) % order.length; if (!i) order = shuffle(order); show(); };
+  $("#mine").value = store.get("ww:mine", "");
+  $("#mine").onchange = () => { store.set("ww:mine", $("#mine").value); paintLists(); if ($("#mine").value.trim()) { list = "My words"; paintLists(); build(); } };
+  paintLists(); build();
+})();
+</script>
+</body>
+</html>

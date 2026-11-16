@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Classroom Activity Planner · Skillyfai</title>
+<link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body data-root=".." data-page="toolkit">
+<main>
+  <div id="tool-hero" data-tool="activity-planner" data-sub="Choose what you need and Skillyfai picks matching activities from its bank, adapted to your topic, with steps and materials."></div>
+  <div id="planner"></div>
+  <div id="related" data-tool="activity-planner"></div>
+</main>
+<script src="../assets/js/catalog.js"></script>
+<script src="../assets/js/core.js"></script>
+<script src="../assets/js/planner.js"></script>
+<script>
+const ACTS = [
+  { n: "Mystery Bag", p: "Warm-up", g: "Whole class", m: 5, mat: "A cloth bag, one object linked to the topic", steps: ["Put an object linked to {t} in a bag.", "Students feel it and ask yes/no questions.", "Reveal it and connect it to today's lesson."] },
+  { n: "Odd One Out", p: "Warm-up", g: "Pairs", m: 5, mat: "Board", steps: ["Write four words about {t}; one does not belong.", "Pairs decide the odd one out and why.", "Accept any well-reasoned answer."] },
+  { n: "Picture Talk", p: "Warm-up", g: "Whole class", m: 8, mat: "One large picture", steps: ["Show a picture connected to {t}.", "Ask: What do you see? What do you think? What do you wonder?", "Note key words on the board."] },
+  { n: "KWL Chart", p: "Teach", g: "Whole class", m: 10, mat: "Board or chart paper", steps: ["Draw three columns: Know, Want to know, Learned.", "Fill 'Know' and 'Want to know' about {t} with the class.", "Fill 'Learned' at the end of the lesson."] },
+  { n: "Hands-on Demonstration", p: "Teach", g: "Small groups", m: 15, mat: "Simple real objects", steps: ["Give each group materials linked to {t}.", "Guide them step by step to observe what happens.", "Groups explain what they saw."] },
+  { n: "Read and Draw", p: "Teach", g: "Individual", m: 15, mat: "Text, notebooks, colours", steps: ["Students read a short passage on {t}.", "They draw a picture or diagram of the main idea.", "Share drawings with a partner."] },
+  { n: "Card Sort", p: "Practice", g: "Small groups", m: 15, mat: "Cut-out word or picture cards", steps: ["Give each group 10–12 cards about {t}.", "Groups sort the cards into categories.", "Groups explain their sorting to another group."] },
+  { n: "Walk and Talk", p: "Practice", g: "Pairs", m: 10, mat: "Question cards", steps: ["Each student gets a question card about {t}.", "Students walk, find a partner, ask and answer.", "Swap cards and find a new partner."] },
+  { n: "Board Race", p: "Practice", g: "Small groups", m: 10, mat: "Board, two chalks", steps: ["Divide the class into two teams.", "Call out a clue about {t}; one student from each team writes the answer.", "The first correct answer wins a point."] },
+  { n: "Role Play", p: "Practice", g: "Small groups", m: 20, mat: "Optional simple props", steps: ["Give each group a situation linked to {t}.", "Groups prepare a 2-minute scene.", "Perform and discuss what was learned."] },
+  { n: "Station Rotation", p: "Practice", g: "Small groups", m: 30, mat: "3–4 activity sheets", steps: ["Set up stations: read, draw, solve, discuss on {t}.", "Groups spend 7 minutes at each station.", "Finish with a class check."] },
+  { n: "Quiz Relay", p: "Review", g: "Small groups", m: 15, mat: "10 questions, board", steps: ["Teams line up.", "Ask a question on {t}; the first student answers, then moves to the back.", "Keep scores on the board."] },
+  { n: "Mind Map", p: "Review", g: "Individual", m: 10, mat: "Notebooks", steps: ["Write {t} in the centre of the page.", "Add branches for key ideas, examples and words.", "Compare with a partner and add missing ideas."] },
+  { n: "Hot Seat", p: "Review", g: "Whole class", m: 10, mat: "One chair", steps: ["A student sits in the hot seat as an expert on {t}.", "Classmates ask questions.", "Rotate the expert every 2 minutes."] },
+  { n: "Gallery Walk", p: "Review", g: "Small groups", m: 20, mat: "Chart paper, markers", steps: ["Groups make a poster on one part of {t}.", "Posters go on the walls.", "Groups move around and add a comment or question."] },
+  { n: "3-2-1 Exit", p: "Closing", g: "Individual", m: 5, mat: "Paper slips", steps: ["3 things you learned about {t}.", "2 questions you still have.", "1 way you could use it."] },
+  { n: "Thumbs Check", p: "Closing", g: "Whole class", m: 3, mat: "None", steps: ["Make a statement about {t}.", "Thumbs up (true), down (false), sideways (not sure).", "Clarify any statement many got wrong."] },
+  { n: "One-word Summary", p: "Closing", g: "Whole class", m: 5, mat: "None", steps: ["Each student says one word that sums up {t}.", "Write the words on the board.", "Pick 2–3 words and ask why."] }
+];
+const PURPOSES = ["Warm-up", "Teach", "Practice", "Review", "Closing"];
+let seed = 0;
+SKPlanner({
+  key: "activities", noun: "activity sheet",
+  title: (v) => "Activities: " + (v.topic || "lesson"),
+  fields: [
+    { id: "topic", label: "Topic", placeholder: "e.g. Animals and their homes" },
+    { id: "subject", label: "Subject", half: true, placeholder: "e.g. EVS" },
+    { id: "cls", label: "Class", half: true, placeholder: "e.g. Class 3" },
+    { id: "purpose", label: "Purpose", type: "checks", options: PURPOSES, value: ["Warm-up", "Practice", "Closing"], ignoreEmpty: true },
+    { id: "group", label: "Grouping", type: "select", options: ["Any", "Whole class", "Pairs", "Small groups", "Individual"], half: true, ignoreEmpty: true },
+    { id: "max", label: "Longest activity", type: "select", options: ["10 minutes", "15 minutes", "20 minutes", "30 minutes"], value: "20 minutes", half: true, ignoreEmpty: true },
+    { id: "notes", label: "Notes", type: "textarea", rows: 2, placeholder: "Anything to remember for this class" }
+  ],
+  example: { topic: "Animals and their homes", subject: "EVS", cls: "Class 3", purpose: ["Warm-up", "Teach", "Practice", "Closing"], group: "Any", max: "20 minutes" },
+  actions: [{ label: "↻ Other activities", run: (c) => { seed++; c.render(); } }],
+  render(v, H) {
+    const t = v.topic || "the topic", max = parseInt(v.max) || 20;
+    const ps = v.purpose.length ? v.purpose : PURPOSES;
+    const chosen = ps.map((p) => {
+      const pool = ACTS.filter((a) => a.p === p && a.m <= max && (v.group === "Any" || !v.group || a.g === v.group));
+      const alt = pool.length ? pool : ACTS.filter((a) => a.p === p && a.m <= max);
+      return alt.length ? alt[seed % alt.length] : null;
+    }).filter(Boolean);
+    const total = chosen.reduce((s, a) => s + a.m, 0);
+    return `<h2>Activity sheet: ${H.esc(t)}</h2>
+      ${H.meta([["Subject", v.subject], ["Class", v.cls], ["Activities", chosen.length], ["Total time", total + " min"]])}
+      ${chosen.map((a, i) => `<h3>${i + 1}. ${a.n} <span class="badge">${a.p}</span> <span class="badge">${a.g}</span> <span class="badge">${a.m} min</span></h3>
+        <p class="small muted" style="margin:0 0 6px">Materials: ${H.esc(a.mat)}</p>${H.list(a.steps.map((s) => s.replace("{t}", t)), "ol")}`).join("")
+        || '<p class="muted">No activity matches these filters. Try "Any" grouping or a longer time.</p>'}
+      ${v.notes ? `<h3>Notes</h3><p>${H.esc(v.notes)}</p>` : ""}`;
+  }
+});
+</script>
+</body>
+</html>

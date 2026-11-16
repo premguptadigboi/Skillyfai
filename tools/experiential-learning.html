@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Experiential Learning Activities · Skillyfai</title>
+<link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body data-root=".." data-page="toolkit">
+<main>
+  <div id="tool-hero" data-tool="experiential" data-sub="Plan learning-by-doing in four stages: Do → Reflect → Learn → Apply. Choose an experience type and Skillyfai drafts each stage."></div>
+  <div id="planner"></div>
+  <div id="related" data-tool="experiential"></div>
+</main>
+<script src="../assets/js/catalog.js"></script>
+<script src="../assets/js/core.js"></script>
+<script src="../assets/js/planner.js"></script>
+<script>
+const TYPES = {
+  "Simple experiment": { do: "Groups carry out a simple, safe experiment on {t} and record what they observe.", mat: "Everyday materials, observation sheet" },
+  "Field visit / nature walk": { do: "Visit the school garden, market or neighbourhood to observe {t} in real life. Students note or sketch 5 observations.", mat: "Notebooks, pencils, a checklist" },
+  "Making / craft": { do: "Students build a model or craft item that shows {t}.", mat: "Waste materials, paper, glue, colours" },
+  "Role play / simulation": { do: "Students act out a situation that involves {t}, taking different roles.", mat: "Role cards, simple props" },
+  "Survey / interview": { do: "Students interview family or community members about {t} and record answers.", mat: "Question sheet (3–5 questions)" },
+  "Art-integrated": { do: "Students express {t} through drawing, song, dance or a story.", mat: "Chart paper, colours, music if available" },
+  "Game": { do: "Play an active game whose rules model {t}.", mat: "Open space, chalk, cards" },
+  "Cooking / gardening": { do: "Students prepare a simple recipe or plant seeds, observing {t} along the way.", mat: "Seeds, pots, soil or simple ingredients" }
+};
+SKPlanner({
+  key: "experiential", noun: "experiential plan",
+  emptyText: "Enter a topic and choose an experience type to plan the four stages.", emptyIcon: "🌱",
+  title: (v) => "Experiential: " + (v.topic || "activity"),
+  fields: [
+    { id: "topic", label: "Topic / concept", placeholder: "e.g. germination of seeds" },
+    { id: "subject", label: "Subject", half: true, placeholder: "e.g. Science" },
+    { id: "cls", label: "Class", half: true, placeholder: "e.g. Class 5" },
+    { id: "type", label: "Type of experience", type: "select", options: Object.keys(TYPES), ignoreEmpty: true },
+    { id: "days", label: "Duration", type: "select", options: ["One period", "Two periods", "One week (short daily check-ins)", "Two weeks"], half: true, ignoreEmpty: true },
+    { id: "group", label: "Grouping", type: "select", options: ["Groups of 4–5", "Pairs", "Individual", "Whole class"], half: true, ignoreEmpty: true },
+    { id: "doText", label: "1. Do: the experience (optional)", type: "textarea", rows: 2, hint: "Leave empty for a suggestion." },
+    { id: "links", label: "Links to other subjects", type: "lines", rows: 2, suggest: ["Mathematics: measure and record data", "Language: write a diary entry", "Art: draw and label", "Social Science: connect to local community"] },
+    { id: "safety", label: "Safety and inclusion notes", type: "textarea", rows: 2 }
+  ],
+  example: { topic: "germination of seeds", subject: "Science", cls: "Class 5", type: "Cooking / gardening", days: "One week (short daily check-ins)", group: "Groups of 4–5",
+    links: ["Mathematics: measure and record data", "Language: write a diary entry"], safety: "Wash hands after handling soil." },
+  render(v, H) {
+    const t = v.topic || "the topic", ty = TYPES[v.type] || TYPES["Simple experiment"];
+    const stages = [
+      ["1. Do (concrete experience)", v.doText || ty.do.replace("{t}", t), "Teacher sets up, gives clear instructions and safety rules, then lets students explore."],
+      ["2. Reflect (observe and think)", `Students talk about what happened: What did you see? What surprised you? What changed? They note answers in a reflection sheet.`, "Ask open questions; avoid giving answers."],
+      ["3. Learn (form the concept)", `Connect observations to the idea of ${t}. Name the key words and build a simple explanation or diagram together.`, "Use the textbook, a chart or a short explanation here."],
+      ["4. Apply (try it in a new situation)", `Students use what they learned about ${t} in a new situation: a problem, a home task, or a small project.`, "Give a real-life challenge or a home activity."]
+    ];
+    return `<h2>${H.esc(H.cap(t))}: learning by doing</h2>
+      ${H.meta([["Subject", v.subject], ["Class", v.cls], ["Experience", v.type], ["Duration", v.days], ["Grouping", v.group]])}
+      <p><b>Materials:</b> ${H.esc(ty.mat)}</p>
+      <table><thead><tr><th style="width:24%">Stage</th><th>What students do</th><th>Teacher's role</th></tr></thead>
+      <tbody>${stages.map((s) => `<tr><td><b>${s[0]}</b></td><td>${H.esc(s[1])}</td><td>${H.esc(s[2])}</td></tr>`).join("")}</tbody></table>
+      <h3>Reflection questions for students</h3>
+      ${H.list(["What did I do today?", "What did I notice or discover?", `What did I learn about ${t}?`, "Where can I use this in my life?", "What would I do differently next time?"])}
+      ${v.links.length ? `<h3>Cross-curricular links</h3>${H.list(v.links)}` : ""}
+      <h3>Evidence of learning</h3>${H.list(["Observation notes or sketches", "Reflection sheet answers", "Group presentation or product", "Application task"])}
+      ${v.safety ? `<h3>Safety and inclusion</h3><p>${H.esc(v.safety)}</p>` : ""}`;
+  }
+});
+</script>
+</body>
+</html>
