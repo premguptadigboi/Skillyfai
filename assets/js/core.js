@@ -59,7 +59,7 @@
       <div class="wrap nav">
         <a class="brand" href="${url("index.html")}" aria-label="Skillyfai home">
           <img src="${url("assets/img/logo.svg")}" alt="" width="36" height="36">
-          <span class="brand-name">Skilly<span>fai</span></span>
+          <span class="brand-text"><span class="brand-name">Skilly<span>fai</span></span><small class="brand-by">by Prem Sir</small></span>
         </a>
         <nav class="nav-links" aria-label="Main">${navHTML()}</nav>
         <div class="nav-actions">
@@ -98,7 +98,7 @@
       <div class="wrap">
         <div class="foot-grid">
           <div>
-            <a class="brand" href="${url("index.html")}"><img src="${url("assets/img/logo.svg")}" alt="" width="32" height="32"><span class="brand-name">Skilly<span>fai</span></span></a>
+            <a class="brand" href="${url("index.html")}"><img src="${url("assets/img/logo.svg")}" alt="" width="32" height="32"><span class="brand-text"><span class="brand-name">Skilly<span>fai</span></span><small class="brand-by">by Prem Sir</small></span></a>
             <p class="foot-tag">${S.tagline} Free classroom tools that run in your browser. No login, nothing to install.</p>
           </div>
           ${S.sections.map((s) => `<div><h4>${s.name}</h4><ul>${toolsIn(s.id).slice(0, 6).map((t) => `<li><a href="${url(t.url)}">${t.name}</a></li>`).join("")}</ul></div>`).join("")}
