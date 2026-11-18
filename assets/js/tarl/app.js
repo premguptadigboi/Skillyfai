@@ -39,7 +39,7 @@
     root.innerHTML = `
       <section class="panel tarl-over">
         <h2>${esc(TITLE)}</h2>
-        <p class="muted">Based on the TaRL (Teaching at the Right Level) teacher manual. ${kind === "literacy" ? "Levels: Beginner, Letter, Word, Para, Story." : "Levels: Beginner, 1-9 number recognition, 10-99 number recognition, Subtraction, Division."} Daily lesson: ${meta.duration} minutes${kind === "literacy" ? " (60 minutes of teaching plus the 10-minute daily reading session)" : ""}.</p>
+        <p class="muted">Based on the TaRL (Teaching at the Right Level) teacher manual. ${kind === "literacy" ? "Levels: Beginner, Letter, Word, Para, Story." : "Levels: Beginner, 1-9 number recognition, 10-99 number recognition, Subtraction, Division."} Daily lesson: ${meta.duration} minutes${kind === "literacy" ? " plus a 10-minute daily reading session at the end of the class" : ""}.</p>
         <div class="tarl-facts"><div><b>90</b><span>Lesson plans</span></div><div><b>45</b><span>Days in Phase 1 (Days 1-45)</span></div><div><b>45</b><span>Days in Phase 2 (Days 46-90)</span></div><div><b>3</b><span>Assessment checkpoints</span></div></div>
         ${timeline()}
         <p class="small muted">Baseline, midline and endline are separate assessment events. They are not counted among the 90 daily lessons.</p>
@@ -77,10 +77,16 @@
       if (m !== pr[2]) msgs.push(c.name + " is " + m + " min but the manual says " + pr[2] + " min");
       parts.push({ no: c.no, key: c.key, name: c.name, ref: pr[3], keywords: c.keywords, rows, minutes: m });
     });
+    let after = null;
+    if (meta.afterClass) {
+      const rows = (p.afterClass ? p.afterClass.rows : []).map((x) => rn[x]).filter(Boolean), m = rows.reduce((s, r) => s + r.minutes, 0);
+      if (!rows.length || m !== meta.afterClass.minutes) msgs.push("the after-class " + meta.afterClass.name + " is " + m + " min but the manual says " + meta.afterClass.minutes + " min");
+      after = { name: meta.afterClass.name, ref: meta.afterClass.ref, minutes: m, rows, keywords: p.afterClass ? p.afterClass.keywords : [] };
+    }
     const total = parts.reduce((s, c) => s + c.minutes, 0), want = pres.reduce((s, x) => s + x[2], 0);
     if (total !== want) msgs.push("total " + total + " min does not match the manual total " + want + " min");
     if (total !== p.duration) msgs.push("lesson duration field says " + p.duration + " min");
-    return { ok: msgs.length === 0, msgs, total, parts };
+    return { ok: msgs.length === 0, msgs, total, parts, after };
   }
 
   /* ------------------------------------------------------------ plan view ------------------------------------------------------------ */
@@ -103,11 +109,15 @@
       <td data-label="Teacher's role">${li(c.rows.map((r) => esc(r.teacher)))}</td>
       <td data-label="Learners' participation">${li(c.rows.map((r) => esc(r.learners)))}</td></tr>`).join("");
     const timeBadge = V.ok ? `<div class="tcheck ok">✔ Time check passed: ${comps.map((c) => c.minutes).join(" + ")} = ${V.total} minutes</div>` : `<div class="tcheck bad">⚠ Time check failed, please review: ${V.msgs.map(esc).join("; ")}</div>`;
+    const afterHTML = V.after ? `<h4 class="afterhead">After the class: ${esc(V.after.name)} (not counted in the ${V.total} minutes) <span class="src src-m" title="A note in the manual's daily timetable">Manual ${esc(V.after.ref)}</span></h4>
+      <div class="tbl-wrap"><table class="tarl-tbl afterclass"><thead><tr><th>Component</th><th>Time</th><th>Teaching-learning activities</th><th>Teacher's role</th><th>Learners' participation</th></tr></thead><tbody><tr><td data-label="Component"><b>${esc(V.after.name)}</b></td><td data-label="Time" class="atm"><b>${V.after.minutes} minutes</b></td>
+      <td data-label="Teaching-learning activities">${li(V.after.rows.map((r) => `<b>${esc(r.activity)}</b> ${grp(r.grouping)}<div class="tlm">TLM: ${esc(r.tlm)}</div>`))}</td><td data-label="Teacher's role">${li(V.after.rows.map((r) => esc(r.teacher)))}</td><td data-label="Learners' participation">${li(V.after.rows.map((r) => esc(r.learners)))}</td></tr></tbody></table></div>` : "";
+    const revAfter = V.after ? `<p class="revafter">+ <b>${esc(V.after.name)}: ${V.after.minutes} min</b> at the end of the class (not in the total) <i>•</i> ${V.after.keywords.map(esc).join(" <i>•</i> ")}</p>` : "";
     const pre = p.preLesson ? `<p class="prelesson">${esc(p.preLesson)}</p>` : "";
     const revRows = comps.map((c) => `<tr><td data-label="Session"><b>${c.no}. ${esc(c.name)}</b></td><td data-label="Time" class="tm">${c.minutes} min</td><td data-label="Keywords / key activities">${c.keywords.map(esc).join(' <i>•</i> ')}</td></tr>`).join("");
     const revision = `<section class="revnote" id="revnote"><h3>QUICK REVISION NOTE – LESSON AT A GLANCE</h3><p class="small muted">${esc(meta.name.replace("TARL ", "").toUpperCase())} · Day ${p.day} · ${esc(p.title)}</p>
       <div class="tbl-wrap"><table class="tarl-tbl rev"><thead><tr><th>Session</th><th>Time</th><th>Keywords / key activities</th></tr></thead><tbody>${revRows}</tbody>
-      <tfoot><tr class="totalrow"><td><b>TOTAL</b></td><td class="tm" data-rev-total><b>${V.total} min</b></td><td><b>Complete lesson: ${V.total} minutes</b></td></tr></tfoot></table></div></section>`;
+      <tfoot><tr class="totalrow"><td><b>TOTAL</b></td><td class="tm" data-rev-total><b>${V.total} min</b></td><td><b>Complete lesson: ${V.total} minutes</b></td></tr></tfoot></table></div>${revAfter}</section>`;
     const procs = p.procedures.map((pr) => `<div class="proc"><h4>${esc(pr.activity)} ${grp(pr.grouping)} ${src(pr)}</h4>
       <div class="tbl-wrap"><table class="tarl-tbl"><thead><tr><th>Step</th><th>Teacher's instructions</th><th>Learners' participation</th></tr></thead><tbody>${pr.steps.map((s, i) => `<tr><td data-label="Step">Step ${i + 1}</td><td data-label="Teacher's instructions">${esc(s.teacher)}</td><td data-label="Learners' participation">${esc(s.learners)}</td></tr>`).join("")}</tbody></table></div></div>`).join("");
     const lv = p.levelTasks.map((l) => `<div class="proc"><h4>${esc(l.activity)} ${src(l)}</h4><div class="tbl-wrap"><table class="tarl-tbl"><thead><tr><th>Level</th><th>Task</th></tr></thead><tbody>${meta.levels.map((n) => `<tr><td data-label="Level"><b>${esc(n)}</b></td><td data-label="Task">${esc(l.tasks[n] || "")}</td></tr>`).join("")}</tbody></table></div></div>`).join("");
@@ -120,9 +130,10 @@
         <tr><th>Programme</th><td>${esc(p.programme)}</td></tr><tr><th>Day serial number</th><td>Day ${p.day} of 90</td></tr><tr><th>Programme phase</th><td>${esc(p.phaseLabel)}</td></tr>
         <tr><th>Subject</th><td>${esc(SUBJECT)}</td></tr><tr><th>Main learning focus</th><td>${esc(p.focus)}</td></tr>
         <tr><th>Learning objectives</th><td>${list(p.objectives)}</td></tr>
-        <tr><th>Overall lesson duration</th><td><b class="bigmin">${V.total} minutes</b> (${comps.map((c) => c.minutes).join(" + ")}), from the manual's daily timetable</td></tr></tbody></table></div></section>
+        <tr><th>Overall lesson duration</th><td><b class="bigmin">${V.total} minutes</b> (${comps.map((c) => c.minutes).join(" + ")}), from the manual's daily timetable${V.after ? ", plus a " + V.after.minutes + "-minute daily reading session at the end of the class" : ""}</td></tr></tbody></table></div></section>
       <section><h3>B. Lesson plan: components and time allocation</h3>${timeBadge}${pre}<div class="tbl-wrap"><table class="tarl-tbl seq"><thead><tr><th>Sl. No.</th><th>Teaching component / session</th><th>Time allocation</th><th>Teaching-learning activities</th><th>Teacher's role</th><th>Learners' participation</th></tr></thead><tbody>${compRows}</tbody>
         <tfoot><tr class="totalrow"><td></td><td><b>TOTAL DURATION</b></td><td class="tm" data-main-total><b>${V.total} minutes</b></td><td colspan="3"><b>TOTAL DURATION = ${V.total} MINUTES</b></td></tr></tfoot></table></div>
+        ${afterHTML}
         <p class="small muted">The time of each component is the manual's. The minutes shown for each activity inside a component are a suggested split that adds up to the component time.</p></section>
       <section><h3>C. Detailed activity procedures</h3>${procs}</section>
       <section><h3>Level-wise tasks</h3>${lv}</section>
@@ -241,6 +252,7 @@
         body: V.parts.map((c) => [c.no, c.name + " [Manual " + c.ref + "]", c.minutes + " min", c.rows.map((r) => "- " + r.activity + " (" + r.grouping + ", " + r.minutes + " min) TLM: " + r.tlm).join("\n"), c.rows.map((r) => "- " + r.teacher).join("\n"), c.rows.map((r) => "- " + r.learners).join("\n")].map(safe)),
         foot: [["", "TOTAL DURATION", V.total + " min", "TOTAL DURATION = " + V.total + " MINUTES", "", ""]], showFoot: "lastPage", footStyles: { fillColor: [235, 238, 250], textColor: 20, fontStyle: "bold" },
         columnStyles: { 0: { cellWidth: 9 }, 1: { cellWidth: 32 }, 2: { cellWidth: 14 }, 3: { cellWidth: 70 }, 4: { cellWidth: 78 } } });
+      if (V.after) tbl("After the class: " + V.after.name + " - " + V.after.minutes + " minutes (not counted in the " + V.total + " minutes) [Manual " + V.after.ref + "]", { head: [["Activity", "Teacher's role", "Learners' participation"]], body: V.after.rows.map((r) => [r.activity + " (" + r.grouping + ") TLM: " + r.tlm, r.teacher, r.learners].map(safe)), columnStyles: { 0: { cellWidth: 70 }, 1: { cellWidth: 100 } } });
       p.procedures.forEach((pr) => tbl("C. Detailed procedure: " + pr.activity + " (" + pr.grouping + ")", { head: [["Step", "Teacher's instructions", "Learners' participation"]], body: pr.steps.map((s, i) => ["Step " + (i + 1), s.teacher, s.learners].map(safe)), columnStyles: { 0: { cellWidth: 16 }, 1: { cellWidth: 150 } } }));
       p.levelTasks.forEach((l) => tbl("Level-wise tasks: " + l.activity, { head: [["Level", "Task"]], body: meta.levels.map((n) => [n, l.tasks[n] || ""].map(safe)), columnStyles: { 0: { cellWidth: 24, fontStyle: "bold" } } }));
       tbl("D. Grouping and classroom organisation", { head: [["Grouping", "Activities today", "How the teacher organises learners"]], body: p.organisation.map((o) => [o.grouping, o.activities.join("; "), o.how].map(safe)), columnStyles: { 0: { cellWidth: 36 }, 1: { cellWidth: 90 } } });
@@ -250,6 +262,7 @@
       tbl("Teacher's notes", { body: p.teacherNotes.map((x) => ["- " + x].map(safe)) });
       tbl("QUICK REVISION NOTE - LESSON AT A GLANCE", { head: [["Session", "Time", "Keywords / key activities"]], body: V.parts.map((c) => [c.no + ". " + c.name, c.minutes + " min", c.keywords.join("  *  ")].map(safe)),
         foot: [["TOTAL", V.total + " min", "Complete lesson: " + V.total + " minutes"]], showFoot: "lastPage", footStyles: { fillColor: [235, 238, 250], textColor: 20, fontStyle: "bold" }, columnStyles: { 0: { cellWidth: 80 }, 1: { cellWidth: 20 } } });
+      if (V.after) { doc.setFont("helvetica", "bold"); doc.setFontSize(8.5); doc.setTextColor(20); doc.text(safe("+ " + V.after.name + ": " + V.after.minutes + " min at the end of the class (not in the total): " + V.after.keywords.join("  *  ")), M, doc.lastAutoTable.finalY + 6, { maxWidth: 277 }); }
       const n = doc.internal.getNumberOfPages();
       for (let i = 1; i <= n; i++) { doc.setPage(i); doc.setFontSize(7.5); doc.setTextColor(120); doc.text(safe("Skillyfai | " + p.programme + " | Day " + p.day + " | prepared from the TaRL Teacher Manual"), M, 205); doc.text("Page " + i + " of " + n, 297 - M, 205, { align: "right" }); }
       doc.save(p.programme.replace(/\s+/g, "-") + "-Day-" + String(p.day).padStart(2, "0") + ".pdf");
