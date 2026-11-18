@@ -20,8 +20,9 @@
     cap: (s) => String(s || "").charAt(0).toUpperCase() + String(s || "").slice(1)
   };
 
-  function fieldHTML(f) {
-    const id = "f_" + f.id;
+  /* pre = id prefix, so several planners can share one page without clashing ids */
+  function fieldHTML(f, pre) {
+    const id = pre + f.id;
     const sug = f.suggest ? `<div class="suggest" data-for="${f.id}">${f.suggest.map((s) => `<button type="button">${esc(s)}</button>`).join("")}</div>` : "";
     const hint = f.hint ? `<span class="hint">${esc(f.hint)}</span>` : "";
     let ctl;
@@ -41,12 +42,12 @@
     return `<div class="field"><label for="${id}">${esc(f.label)}</label>${ctl}${hint}${sug}</div>`;
   }
 
-  function layoutFields(fields) {
+  function layoutFields(fields, pre) {
     let out = "", buf = [];
     const flush = () => { if (buf.length) { out += buf.length > 1 ? `<div class="grid-2">${buf.join("")}</div>` : buf[0]; buf = []; } };
     fields.forEach((f) => {
       if (f.section) { flush(); out += `<h3 style="font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin:20px 0 10px">${esc(f.section)}</h3>`; return; }
-      if (f.half) { buf.push(fieldHTML(f)); if (buf.length === 2) flush(); } else { flush(); out += fieldHTML(f); }
+      if (f.half) { buf.push(fieldHTML(f, pre)); if (buf.length === 2) flush(); } else { flush(); out += fieldHTML(f, pre); }
     });
     flush();
     return out;
@@ -63,7 +64,7 @@
           <div class="panel-head"><h2>Details</h2>
             <div class="toolbar">${cfg.example ? '<button class="btn btn-soft btn-sm" type="button" data-act="example">Fill example</button>' : ""}
             <button class="btn btn-ghost btn-sm" type="button" data-act="clear">Clear</button></div></div>
-          <form autocomplete="off" onsubmit="return false">${layoutFields(cfg.fields)}
+          <form autocomplete="off" onsubmit="return false">${layoutFields(cfg.fields, cfg.idPrefix || "f_")}
             ${cfg.generateLabel ? `<button type="button" class="btn btn-primary btn-lg" data-act="generate" style="width:100%;margin-top:6px">${cfg.generateLabel}</button>` : ""}</form>
         </div>
         <div class="panel">

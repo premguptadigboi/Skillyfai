@@ -3,75 +3,354 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Classroom Activity Planner · Skillyfai</title>
+<title>Activity Planning Suite · Skillyfai</title>
 <link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/styles.css">
+<style>
+  /* Group tab */
+  .groups { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .grp { border-radius: 16px; padding: 16px; border: 1px solid var(--border); background: var(--surface); border-top: 6px solid var(--c); }
+  .grp h3 { margin: 0 0 10px; font-size: 1.05rem; display: flex; justify-content: space-between; }
+  .grp ul { list-style: none; margin: 0; padding: 0; }
+  .grp li { padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 8px; font-size: .95rem; }
+  .grp li:last-child { border: 0; }
+  .grp .role { font-size: .74rem; font-weight: 700; color: var(--muted); background: var(--bg-soft); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .grp .task { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: var(--surface-2); font-size: .86rem; }
+  .fs-target:fullscreen .groups { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); font-size: 1.2rem; }
+  /* Assessment tab: exit tickets */
+  .tickets { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px dashed #999; margin-top: 8px; }
+  .ticket { border: 1px dashed #999; padding: 12px; min-height: 120px; font-size: .88rem; }
+  .ticket b { display: block; margin-bottom: 6px; }
+  .ticket .ln { border-bottom: 1px solid #bbb; height: 22px; }
+  .smile { display: flex; gap: 18px; font-size: 1.6rem; flex-wrap: wrap; }
+  .suite-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 14px 0 12px; }
+</style>
 </head>
 <body data-root=".." data-page="toolkit">
 <main>
-  <div id="tool-hero" data-tool="activity-planner" data-sub="Choose what you need and Skillyfai picks matching activities from its bank, adapted to your topic, with steps and materials."></div>
-  <div id="planner"></div>
-  <div id="related" data-tool="activity-planner"></div>
+  <div id="tool-hero" data-tool="activity-suite" data-sub="Plan individual, group, experiential and assessment activities all in one place. Pick a tab to begin."></div>
+
+  <div class="wrap">
+    <div class="suite-top no-print"><a class="btn btn-ghost btn-sm" href="../index.html#toolkit">← Back to Toolkit</a></div>
+    <div class="tabbar no-print" role="tablist" aria-label="Activity planning tools">
+      <button class="tab-btn active" role="tab" id="tab-individual" aria-controls="pane-individual" aria-selected="true" data-tab="individual"><span class="ti">🗓️</span><span>Individual<small>Activity planner</small></span></button>
+      <button class="tab-btn" role="tab" id="tab-group" aria-controls="pane-group" aria-selected="false" data-tab="group"><span class="ti">👥</span><span>Group<small>Group creator</small></span></button>
+      <button class="tab-btn" role="tab" id="tab-experiential" aria-controls="pane-experiential" aria-selected="false" data-tab="experiential"><span class="ti">🌱</span><span>Experiential<small>Learning by doing</small></span></button>
+      <button class="tab-btn" role="tab" id="tab-assessment" aria-controls="pane-assessment" aria-selected="false" data-tab="assessment"><span class="ti">✅</span><span>Assessment<small>Rubric and exit tickets</small></span></button>
+    </div>
+  </div>
+
+  <!-- ============ 1. INDIVIDUAL ============ -->
+  <section class="tab-pane active" id="pane-individual" role="tabpanel" aria-labelledby="tab-individual"><div id="planner-individual"></div></section>
+
+  <!-- ============ 2. GROUP ============ -->
+  <section class="tab-pane" id="pane-group" role="tabpanel" aria-labelledby="tab-group">
+    <div class="wrap split">
+      <div class="sticky no-print">
+        <div class="panel">
+          <div class="panel-head"><h2>Class list</h2><button type="button" class="btn btn-soft btn-sm" id="g-sample">Sample names</button></div>
+          <div class="field">
+            <label for="g-names">Class list (one name per line)</label>
+            <textarea class="textarea" id="g-names" rows="8" placeholder="Aarav&#10;Diya&#10;Kabir&#10;…"></textarea>
+            <span class="hint"><span id="g-count">0</span> students · put <b>#</b> before a name to mark absent</span>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label for="g-mode">Make groups by</label>
+              <select class="select" id="g-mode"><option value="size">Group size (students per group)</option><option value="groups">Number of groups</option></select></div>
+            <div class="field"><label for="g-num" id="g-numLabel">Group size</label><input class="input" type="number" id="g-num" min="1" max="50" value="4"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label for="g-theme">Group names</label>
+              <select class="select" id="g-theme"><option>Colours</option><option>Animals</option><option>Planets</option><option>Rivers</option><option>Numbers</option></select></div>
+            <div class="field"><label for="g-task">Group task (optional)</label><input class="input" id="g-task" placeholder="e.g. Make a poster"></div>
+          </div>
+          <label class="check" style="margin-bottom:8px"><input type="checkbox" id="g-useRoles" checked> <span>Assign roles</span></label>
+          <div class="field"><input class="input" id="g-roles" value="Leader, Recorder, Timekeeper, Presenter, Materials" aria-label="Roles"><span class="hint">Roles, separated by commas</span></div>
+          <button type="button" class="btn btn-primary btn-lg" id="g-make" style="width:100%">Generate Fair Groups</button>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>Saved classes</h2></div>
+          <div class="row"><input class="input" id="g-className" placeholder="Class name, e.g. 5A" style="flex:1" aria-label="Class name"><button type="button" class="btn btn-ghost btn-sm" id="g-saveClass">Save list</button></div>
+          <ul class="saved" id="g-classes" style="margin-top:8px"></ul>
+        </div>
+      </div>
+      <div class="panel fs-target" id="g-out">
+        <div class="panel-head no-print"><h2>Groups</h2>
+          <div class="toolbar"><button type="button" class="btn btn-ghost btn-sm" id="g-again">↻ Reshuffle</button><button type="button" class="btn btn-ghost btn-sm" id="g-copy">Copy</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="g-fs">Full screen</button><button type="button" class="btn btn-ghost btn-sm" id="g-print">Print</button></div></div>
+        <div id="g-groups"><div class="empty"><div class="e-icon">👥</div><p>Add names and press <b>Generate Fair Groups</b>.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3. EXPERIENTIAL ============ -->
+  <section class="tab-pane" id="pane-experiential" role="tabpanel" aria-labelledby="tab-experiential"><div id="planner-experiential"></div></section>
+
+  <!-- ============ 4. ASSESSMENT ============ -->
+  <section class="tab-pane" id="pane-assessment" role="tabpanel" aria-labelledby="tab-assessment"><div id="planner-assessment"></div></section>
 </main>
 <script src="../assets/js/catalog.js"></script>
 <script src="../assets/js/core.js"></script>
 <script src="../assets/js/planner.js"></script>
 <script>
-const ACTS = [
-  { n: "Mystery Bag", p: "Warm-up", g: "Whole class", m: 5, mat: "A cloth bag, one object linked to the topic", steps: ["Put an object linked to {t} in a bag.", "Students feel it and ask yes/no questions.", "Reveal it and connect it to today's lesson."] },
-  { n: "Odd One Out", p: "Warm-up", g: "Pairs", m: 5, mat: "Board", steps: ["Write four words about {t}; one does not belong.", "Pairs decide the odd one out and why.", "Accept any well-reasoned answer."] },
-  { n: "Picture Talk", p: "Warm-up", g: "Whole class", m: 8, mat: "One large picture", steps: ["Show a picture connected to {t}.", "Ask: What do you see? What do you think? What do you wonder?", "Note key words on the board."] },
-  { n: "KWL Chart", p: "Teach", g: "Whole class", m: 10, mat: "Board or chart paper", steps: ["Draw three columns: Know, Want to know, Learned.", "Fill 'Know' and 'Want to know' about {t} with the class.", "Fill 'Learned' at the end of the lesson."] },
-  { n: "Hands-on Demonstration", p: "Teach", g: "Small groups", m: 15, mat: "Simple real objects", steps: ["Give each group materials linked to {t}.", "Guide them step by step to observe what happens.", "Groups explain what they saw."] },
-  { n: "Read and Draw", p: "Teach", g: "Individual", m: 15, mat: "Text, notebooks, colours", steps: ["Students read a short passage on {t}.", "They draw a picture or diagram of the main idea.", "Share drawings with a partner."] },
-  { n: "Card Sort", p: "Practice", g: "Small groups", m: 15, mat: "Cut-out word or picture cards", steps: ["Give each group 10–12 cards about {t}.", "Groups sort the cards into categories.", "Groups explain their sorting to another group."] },
-  { n: "Walk and Talk", p: "Practice", g: "Pairs", m: 10, mat: "Question cards", steps: ["Each student gets a question card about {t}.", "Students walk, find a partner, ask and answer.", "Swap cards and find a new partner."] },
-  { n: "Board Race", p: "Practice", g: "Small groups", m: 10, mat: "Board, two chalks", steps: ["Divide the class into two teams.", "Call out a clue about {t}; one student from each team writes the answer.", "The first correct answer wins a point."] },
-  { n: "Role Play", p: "Practice", g: "Small groups", m: 20, mat: "Optional simple props", steps: ["Give each group a situation linked to {t}.", "Groups prepare a 2-minute scene.", "Perform and discuss what was learned."] },
-  { n: "Station Rotation", p: "Practice", g: "Small groups", m: 30, mat: "3–4 activity sheets", steps: ["Set up stations: read, draw, solve, discuss on {t}.", "Groups spend 7 minutes at each station.", "Finish with a class check."] },
-  { n: "Quiz Relay", p: "Review", g: "Small groups", m: 15, mat: "10 questions, board", steps: ["Teams line up.", "Ask a question on {t}; the first student answers, then moves to the back.", "Keep scores on the board."] },
-  { n: "Mind Map", p: "Review", g: "Individual", m: 10, mat: "Notebooks", steps: ["Write {t} in the centre of the page.", "Add branches for key ideas, examples and words.", "Compare with a partner and add missing ideas."] },
-  { n: "Hot Seat", p: "Review", g: "Whole class", m: 10, mat: "One chair", steps: ["A student sits in the hot seat as an expert on {t}.", "Classmates ask questions.", "Rotate the expert every 2 minutes."] },
-  { n: "Gallery Walk", p: "Review", g: "Small groups", m: 20, mat: "Chart paper, markers", steps: ["Groups make a poster on one part of {t}.", "Posters go on the walls.", "Groups move around and add a comment or question."] },
-  { n: "3-2-1 Exit", p: "Closing", g: "Individual", m: 5, mat: "Paper slips", steps: ["3 things you learned about {t}.", "2 questions you still have.", "1 way you could use it."] },
-  { n: "Thumbs Check", p: "Closing", g: "Whole class", m: 3, mat: "None", steps: ["Make a statement about {t}.", "Thumbs up (true), down (false), sideways (not sure).", "Clarify any statement many got wrong."] },
-  { n: "One-word Summary", p: "Closing", g: "Whole class", m: 5, mat: "None", steps: ["Each student says one word that sums up {t}.", "Write the words on the board.", "Pick 2–3 words and ask why."] }
-];
-const PURPOSES = ["Warm-up", "Teach", "Practice", "Review", "Closing"];
-let seed = 0;
-SKPlanner({
-  key: "activities", noun: "activity sheet",
-  title: (v) => "Activities: " + (v.topic || "lesson"),
-  fields: [
-    { id: "topic", label: "Topic", placeholder: "e.g. Animals and their homes" },
-    { id: "subject", label: "Subject", half: true, placeholder: "e.g. EVS" },
-    { id: "cls", label: "Class", half: true, placeholder: "e.g. Class 3" },
-    { id: "purpose", label: "Purpose", type: "checks", options: PURPOSES, value: ["Warm-up", "Practice", "Closing"], ignoreEmpty: true },
-    { id: "group", label: "Grouping", type: "select", options: ["Any", "Whole class", "Pairs", "Small groups", "Individual"], half: true, ignoreEmpty: true },
-    { id: "max", label: "Longest activity", type: "select", options: ["10 minutes", "15 minutes", "20 minutes", "30 minutes"], value: "20 minutes", half: true, ignoreEmpty: true },
-    { id: "notes", label: "Notes", type: "textarea", rows: 2, placeholder: "Anything to remember for this class" }
-  ],
-  example: { topic: "Animals and their homes", subject: "EVS", cls: "Class 3", purpose: ["Warm-up", "Teach", "Practice", "Closing"], group: "Any", max: "20 minutes" },
-  actions: [{ label: "↻ Other activities", run: (c) => { seed++; c.render(); } }],
-  render(v, H) {
-    const t = v.topic || "the topic", max = parseInt(v.max) || 20;
-    const ps = v.purpose.length ? v.purpose : PURPOSES;
-    const chosen = ps.map((p) => {
-      const pool = ACTS.filter((a) => a.p === p && a.m <= max && (v.group === "Any" || !v.group || a.g === v.group));
-      const alt = pool.length ? pool : ACTS.filter((a) => a.p === p && a.m <= max);
-      return alt.length ? alt[seed % alt.length] : null;
-    }).filter(Boolean);
-    const total = chosen.reduce((s, a) => s + a.m, 0);
-    return `<h2>Activity sheet: ${H.esc(t)}</h2>
-      ${H.meta([["Subject", v.subject], ["Class", v.cls], ["Activities", chosen.length], ["Total time", total + " min"]])}
-      ${chosen.map((a, i) => `<h3>${i + 1}. ${a.n} <span class="badge">${a.p}</span> <span class="badge">${a.g}</span> <span class="badge">${a.m} min</span></h3>
-        <p class="small muted" style="margin:0 0 6px">Materials: ${H.esc(a.mat)}</p>${H.list(a.steps.map((s) => s.replace("{t}", t)), "ol")}`).join("")
-        || '<p class="muted">No activity matches these filters. Try "Any" grouping or a longer time.</p>'}
-      ${v.notes ? `<h3>Notes</h3><p>${H.esc(v.notes)}</p>` : ""}`;
+(function () {
+  "use strict";
+  const { $, $$, esc, store, shuffle, toast, copyText, printEl, toggleFullscreen } = SK;
+  const SUBJECTS = ["English", "Mathematics", "EVS", "Science", "Social Science", "Hindi", "Assamese", "Other"];
+
+  /* ================= TABS ================= */
+  const TABS = ["individual", "group", "experiential", "assessment"];
+  function showTab(id, focus) {
+    if (!TABS.includes(id)) id = TABS[0];
+    $$(".tab-btn").forEach((b) => { const on = b.dataset.tab === id; b.classList.toggle("active", on); b.setAttribute("aria-selected", on); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); });
+    $$(".tab-pane").forEach((p) => p.classList.toggle("active", p.id === "pane-" + id));
+    store.set("suite:tab", id);
+    try { history.replaceState(null, "", "#" + id); } catch (e) {}
   }
-});
+  $(".tabbar").addEventListener("click", (e) => { const b = e.target.closest(".tab-btn"); if (b) showTab(b.dataset.tab); });
+  $(".tabbar").addEventListener("keydown", (e) => {            // arrow keys move between tabs
+    const i = TABS.indexOf(document.activeElement.dataset ? document.activeElement.dataset.tab : "");
+    if (i < 0 || !["ArrowRight", "ArrowLeft", "Home", "End"].includes(e.key)) return;
+    e.preventDefault(); showTab(TABS[e.key === "Home" ? 0 : e.key === "End" ? 3 : (i + (e.key === "ArrowRight" ? 1 : 3)) % 4], true);
+  });
+  window.addEventListener("hashchange", () => showTab(location.hash.slice(1)));
+
+  /* ================= 1. INDIVIDUAL ================= */
+  const ACTS = [
+    { n: "Mystery Bag", p: "Warm-up", g: "Whole class", m: 5, mat: "A cloth bag, one object linked to the topic", steps: ["Put an object linked to {t} in a bag.", "Students feel it and ask yes/no questions.", "Reveal it and connect it to today's lesson."] },
+    { n: "Odd One Out", p: "Warm-up", g: "Pairs", m: 5, mat: "Board", steps: ["Write four words about {t}; one does not belong.", "Pairs decide the odd one out and why.", "Accept any well-reasoned answer."] },
+    { n: "Picture Talk", p: "Warm-up", g: "Whole class", m: 8, mat: "One large picture", steps: ["Show a picture connected to {t}.", "Ask: What do you see? What do you think? What do you wonder?", "Note key words on the board."] },
+    { n: "KWL Chart", p: "Teach", g: "Whole class", m: 10, mat: "Board or chart paper", steps: ["Draw three columns: Know, Want to know, Learned.", "Fill 'Know' and 'Want to know' about {t} with the class.", "Fill 'Learned' at the end of the lesson."] },
+    { n: "Hands-on Demonstration", p: "Teach", g: "Small groups", m: 15, mat: "Simple real objects", steps: ["Give each group materials linked to {t}.", "Guide them step by step to observe what happens.", "Groups explain what they saw."] },
+    { n: "Read and Draw", p: "Teach", g: "Individual", m: 15, mat: "Text, notebooks, colours", steps: ["Students read a short passage on {t}.", "They draw a picture or diagram of the main idea.", "Share drawings with a partner."] },
+    { n: "Card Sort", p: "Practice", g: "Small groups", m: 15, mat: "Cut-out word or picture cards", steps: ["Give each group 10–12 cards about {t}.", "Groups sort the cards into categories.", "Groups explain their sorting to another group."] },
+    { n: "Walk and Talk", p: "Practice", g: "Pairs", m: 10, mat: "Question cards", steps: ["Each student gets a question card about {t}.", "Students walk, find a partner, ask and answer.", "Swap cards and find a new partner."] },
+    { n: "Board Race", p: "Practice", g: "Small groups", m: 10, mat: "Board, two chalks", steps: ["Divide the class into two teams.", "Call out a clue about {t}; one student from each team writes the answer.", "The first correct answer wins a point."] },
+    { n: "Role Play", p: "Practice", g: "Small groups", m: 20, mat: "Optional simple props", steps: ["Give each group a situation linked to {t}.", "Groups prepare a 2-minute scene.", "Perform and discuss what was learned."] },
+    { n: "Station Rotation", p: "Practice", g: "Small groups", m: 30, mat: "3–4 activity sheets", steps: ["Set up stations: read, draw, solve, discuss on {t}.", "Groups spend 7 minutes at each station.", "Finish with a class check."] },
+    { n: "Quiz Relay", p: "Review", g: "Small groups", m: 15, mat: "10 questions, board", steps: ["Teams line up.", "Ask a question on {t}; the first student answers, then moves to the back.", "Keep scores on the board."] },
+    { n: "Mind Map", p: "Review", g: "Individual", m: 10, mat: "Notebooks", steps: ["Write {t} in the centre of the page.", "Add branches for key ideas, examples and words.", "Compare with a partner and add missing ideas."] },
+    { n: "Hot Seat", p: "Review", g: "Whole class", m: 10, mat: "One chair", steps: ["A student sits in the hot seat as an expert on {t}.", "Classmates ask questions.", "Rotate the expert every 2 minutes."] },
+    { n: "Gallery Walk", p: "Review", g: "Small groups", m: 20, mat: "Chart paper, markers", steps: ["Groups make a poster on one part of {t}.", "Posters go on the walls.", "Groups move around and add a comment or question."] },
+    { n: "3-2-1 Exit", p: "Closing", g: "Individual", m: 5, mat: "Paper slips", steps: ["3 things you learned about {t}.", "2 questions you still have.", "1 way you could use it."] },
+    { n: "Thumbs Check", p: "Closing", g: "Whole class", m: 3, mat: "None", steps: ["Make a statement about {t}.", "Thumbs up (true), down (false), sideways (not sure).", "Clarify any statement many got wrong."] },
+    { n: "One-word Summary", p: "Closing", g: "Whole class", m: 5, mat: "None", steps: ["Each student says one word that sums up {t}.", "Write the words on the board.", "Pick 2–3 words and ask why."] }
+  ];
+  const PURPOSES = ["Warm-up", "Teach", "Practice", "Review", "Closing"];
+  let indSeed = 0;
+  SKPlanner({
+    mount: "#planner-individual", idPrefix: "ind_", key: "activities", noun: "activity sheet",
+    generateLabel: "Build Activity Sheet",
+    validate: (v) => !v.subject ? "Please select the subject" : !v.topic ? "Please type the topic" : "",
+    emptyText: "Choose the subject, time and grouping, type the topic, then press “Build Activity Sheet”.", emptyIcon: "🗓️",
+    title: (v) => "Activities: " + (v.topic || "lesson"),
+    fields: [
+      { id: "subject", label: "Subject", type: "select", placeholder: "Select subject", options: SUBJECTS, half: true },
+      { id: "topic", label: "Topic", placeholder: "e.g. Animals and their homes", half: true },
+      { id: "max", label: "Time (longest activity)", type: "select", options: ["10 minutes", "15 minutes", "20 minutes", "30 minutes"], value: "20 minutes", half: true, ignoreEmpty: true },
+      { id: "group", label: "Grouping", type: "select", options: ["Any", "Whole class", "Pairs", "Small groups", "Individual"], half: true, ignoreEmpty: true },
+      { id: "purpose", label: "Purpose", type: "checks", options: PURPOSES, value: ["Warm-up", "Practice", "Closing"], ignoreEmpty: true }
+    ],
+    example: { subject: "EVS", topic: "Animals and their homes", max: "20 minutes", group: "Any", purpose: ["Warm-up", "Teach", "Practice", "Closing"] },
+    actions: [{ label: "↻ Other activities", run: (c) => { indSeed++; c.render(); } }],
+    render(v, H) {
+      if (!v.topic) return `<div class="empty"><div class="e-icon">🗓️</div><p>Type the <b>topic</b>, then press “Build Activity Sheet”.</p></div>`;
+      const t = v.topic, max = parseInt(v.max) || 20, ps = v.purpose.length ? v.purpose : PURPOSES;
+      const chosen = ps.map((p) => {
+        const pool = ACTS.filter((a) => a.p === p && a.m <= max && (v.group === "Any" || !v.group || a.g === v.group));
+        const alt = pool.length ? pool : ACTS.filter((a) => a.p === p && a.m <= max);
+        return alt.length ? alt[indSeed % alt.length] : null;
+      }).filter(Boolean);
+      const total = chosen.reduce((s, a) => s + a.m, 0);
+      return `<h2>Activity sheet: ${H.esc(t)}</h2>
+        ${H.meta([["Subject", v.subject], ["Grouping", v.group], ["Activities", chosen.length], ["Total time", total + " min"]])}
+        ${chosen.map((a, i) => `<h3>${i + 1}. ${a.n} <span class="badge">${a.p}</span> <span class="badge">${a.g}</span> <span class="badge">${a.m} min</span></h3>
+          <p class="small muted" style="margin:0 0 6px">Materials: ${H.esc(a.mat)}</p>${H.list(a.steps.map((s) => s.replace("{t}", t)), "ol")}`).join("")
+          || '<p class="muted">No activity matches these choices. Try "Any" grouping or a longer time.</p>'}`;
+    }
+  });
+
+  /* ================= 2. GROUP ================= */
+  const THEMES = {
+    Colours: [["Red", "#e5484d"], ["Blue", "#3e7bfa"], ["Green", "#2aa876"], ["Yellow", "#e2a400"], ["Purple", "#8e4ec6"], ["Orange", "#f76b15"], ["Pink", "#d6409f"], ["Teal", "#12a594"], ["Brown", "#a0522d"], ["Grey", "#6f6e77"]],
+    Animals: ["Tigers", "Elephants", "Peacocks", "Dolphins", "Rhinos", "Eagles", "Pandas", "Lions", "Owls", "Deer"],
+    Planets: ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Moon", "Sun"],
+    Rivers: ["Ganga", "Brahmaputra", "Yamuna", "Godavari", "Krishna", "Kaveri", "Narmada", "Mahanadi", "Teesta", "Indus"],
+    Numbers: []
+  };
+  const PAL = THEMES.Colours.map((c) => c[1]);
+  const SAMPLE = "Aarav\nDiya\nKabir\nAnanya\nIshaan\nMeera\nRohan\nSara\nVihaan\nZoya\nArjun\nKavya\nNikhil\nPriya\nRahul\nTara\nDev\nNisha\nOm\nRiya";
+  const GIDS = { names: "g-names", mode: "g-mode", num: "g-num", theme: "g-theme", task: "g-task", roles: "g-roles" };
+  const draft = store.get("groups:draft", {});
+  Object.entries(GIDS).forEach(([k, id]) => { if (draft[k] != null) $("#" + id).value = draft[k]; });
+  let last = null;
+  const gNames = () => $("#g-names").value.split(/\n+/).map((s) => s.trim()).filter((s) => s && !s.startsWith("#"));
+  const gSave = () => store.set("groups:draft", Object.fromEntries(Object.entries(GIDS).map(([k, id]) => [k, $("#" + id).value])));
+  function gInfo() {
+    $("#g-count").textContent = gNames().length;
+    $("#g-numLabel").textContent = $("#g-mode").value === "size" ? "Group size" : "Number of groups";
+  }
+  $("#pane-group").addEventListener("input", () => { gInfo(); gSave(); });
+  $("#pane-group").addEventListener("change", () => { gInfo(); gSave(); });
+  gInfo();
+
+  function makeGroups() {
+    const list = shuffle(gNames());
+    if (list.length < 2) { toast("Add at least 2 names"); return; }
+    const n = Math.max(1, +$("#g-num").value || 1);
+    const g = Math.min(list.length, $("#g-mode").value === "groups" ? n : Math.ceil(list.length / n));
+    const groups = Array.from({ length: g }, () => []);
+    list.forEach((s, i) => groups[i % g].push(s));
+    const roles = $("#g-useRoles").checked ? $("#g-roles").value.split(",").map((r) => r.trim()).filter(Boolean) : [];
+    const th = $("#g-theme").value, task = $("#g-task").value.trim();
+    last = groups.map((m, i) => {
+      const t = THEMES[th][i % (THEMES[th].length || 1)];
+      return { name: th === "Numbers" ? "Group " + (i + 1) : Array.isArray(t) ? t[0] : t, color: Array.isArray(t) ? t[1] : PAL[i % PAL.length], members: m.map((s, j) => ({ s, r: roles[j] || "" })) };
+    });
+    $("#g-groups").innerHTML = `<div class="groups">${last.map((G) => `<div class="grp" style="--c:${G.color}"><h3>${esc(G.name)}<span class="badge">${G.members.length}</span></h3>
+      <ul>${G.members.map((m) => `<li><span>${esc(m.s)}</span>${m.r ? `<span class="role">${esc(m.r)}</span>` : ""}</li>`).join("")}</ul>
+      ${task ? `<div class="task"><b>Task:</b> ${esc(task)}</div>` : ""}</div>`).join("")}</div>`;
+  }
+  $("#g-make").onclick = makeGroups;
+  $("#g-again").onclick = () => (last ? makeGroups() : toast("Generate groups first"));
+  $("#g-sample").onclick = () => { $("#g-names").value = SAMPLE; gInfo(); gSave(); };
+  $("#g-copy").onclick = () => last ? copyText(last.map((G) => G.name + ": " + G.members.map((m) => m.s + (m.r ? " (" + m.r + ")" : "")).join(", ")).join("\n")) : toast("Generate groups first");
+  $("#g-print").onclick = () => last ? printEl($("#g-out")) : toast("Generate groups first");
+  $("#g-fs").onclick = () => toggleFullscreen($("#g-out"));
+
+  function paintClasses() {
+    const cl = store.get("classes", []);
+    $("#g-classes").innerHTML = cl.length ? cl.map((c, i) => `<li><span class="s-name">${esc(c.name)}</span><small class="muted">${c.names.split("\n").filter(Boolean).length}</small><button type="button" data-l="${i}">Load</button><button type="button" data-d="${i}" aria-label="Delete">✕</button></li>`).join("")
+      : '<li class="muted">Save a class list to reuse it next time.</li>';
+  }
+  $("#g-saveClass").onclick = () => {
+    const name = $("#g-className").value.trim() || "Class " + new Date().toLocaleDateString();
+    if (!gNames().length) { toast("Add names first"); return; }
+    const cl = store.get("classes", []).filter((c) => c.name !== name);
+    cl.unshift({ name, names: $("#g-names").value }); store.set("classes", cl); paintClasses(); toast("Saved " + name);
+  };
+  $("#g-classes").onclick = (e) => {
+    const cl = store.get("classes", []), l = e.target.dataset.l, d = e.target.dataset.d;
+    if (l != null) { $("#g-names").value = cl[l].names; $("#g-className").value = cl[l].name; gInfo(); gSave(); toast("Loaded " + cl[l].name); }
+    if (d != null && confirm("Delete " + cl[d].name + "?")) { cl.splice(d, 1); store.set("classes", cl); paintClasses(); }
+  };
+  paintClasses();
+
+  /* ================= 3. EXPERIENTIAL ================= */
+  const TYPES = {
+    "Simple experiment": { do: "Groups carry out a simple, safe experiment on {t} and record what they observe.", mat: "Everyday materials, observation sheet" },
+    "Field visit / nature walk": { do: "Visit the school garden, market or neighbourhood to observe {t} in real life. Students note or sketch 5 observations.", mat: "Notebooks, pencils, a checklist" },
+    "Making / craft": { do: "Students build a model or craft item that shows {t}.", mat: "Waste materials, paper, glue, colours" },
+    "Role play / simulation": { do: "Students act out a situation that involves {t}, taking different roles.", mat: "Role cards, simple props" },
+    "Survey / interview": { do: "Students interview family or community members about {t} and record answers.", mat: "Question sheet (3–5 questions)" },
+    "Art-integrated": { do: "Students express {t} through drawing, song, dance or a story.", mat: "Chart paper, colours, music if available" },
+    "Game": { do: "Play an active game whose rules model {t}.", mat: "Open space, chalk, cards" },
+    "Cooking / gardening": { do: "Students prepare a simple recipe or plant seeds, observing {t} along the way.", mat: "Seeds, pots, soil or simple ingredients" }
+  };
+  const CYCLE = ["Do", "Reflect", "Learn", "Apply"];
+  SKPlanner({
+    mount: "#planner-experiential", idPrefix: "exp_", key: "experiential", noun: "experiential plan",
+    emptyText: "Type a topic and choose the stages of the cycle to plan learning by doing.", emptyIcon: "🌱",
+    title: (v) => "Experiential: " + (v.topic || "activity"),
+    fields: [
+      { id: "topic", label: "Topic / concept", placeholder: "e.g. germination of seeds" },
+      { id: "subject", label: "Subject", type: "select", placeholder: "Select subject", options: SUBJECTS, half: true },
+      { id: "cls", label: "Class", half: true, placeholder: "e.g. Class 5" },
+      { id: "cycle", label: "Learning cycle: stages to include", type: "checks", options: CYCLE, value: CYCLE, ignoreEmpty: true },
+      { id: "type", label: "Type of experience", type: "select", options: Object.keys(TYPES), ignoreEmpty: true },
+      { id: "days", label: "Duration", type: "select", options: ["One period", "Two periods", "One week (short daily check-ins)", "Two weeks"], half: true, ignoreEmpty: true },
+      { id: "group", label: "Grouping", type: "select", options: ["Groups of 4–5", "Pairs", "Individual", "Whole class"], half: true, ignoreEmpty: true },
+      { id: "doText", label: "Do: the experience (optional)", type: "textarea", rows: 2, hint: "Leave empty for a suggestion." },
+      { id: "links", label: "Links to other subjects", type: "lines", rows: 2, suggest: ["Mathematics: measure and record data", "Language: write a diary entry", "Art: draw and label", "Social Science: connect to local community"] },
+      { id: "safety", label: "Safety and inclusion notes", type: "textarea", rows: 2 }
+    ],
+    example: { topic: "germination of seeds", subject: "Science", cls: "Class 5", cycle: CYCLE, type: "Cooking / gardening", days: "One week (short daily check-ins)", group: "Groups of 4–5",
+      links: ["Mathematics: measure and record data", "Language: write a diary entry"], safety: "Wash hands after handling soil." },
+    render(v, H) {
+      if (!v.topic) return `<div class="empty"><div class="e-icon">🌱</div><p>Type a <b>topic</b> to plan the cycle.</p></div>`;
+      const t = v.topic, ty = TYPES[v.type] || TYPES["Simple experiment"], pick = v.cycle.length ? v.cycle : CYCLE;
+      const all = {
+        Do: ["Do (concrete experience)", v.doText || ty.do.replace("{t}", t), "Teacher sets up, gives clear instructions and safety rules, then lets students explore."],
+        Reflect: ["Reflect (observe and think)", "Students talk about what happened: What did you see? What surprised you? What changed? They note answers in a reflection sheet.", "Ask open questions; avoid giving answers."],
+        Learn: ["Learn (form the concept)", `Connect observations to the idea of ${t}. Name the key words and build a simple explanation or diagram together.`, "Use the textbook, a chart or a short explanation here."],
+        Apply: ["Apply (try it in a new situation)", `Students use what they learned about ${t} in a new situation: a problem, a home task, or a small project.`, "Give a real-life challenge or a home activity."]
+      };
+      const stages = CYCLE.filter((c) => pick.includes(c)).map((c) => all[c]);
+      return `<h2>${H.esc(H.cap(t))}: learning by doing</h2>
+        ${H.meta([["Subject", v.subject], ["Class", v.cls], ["Experience", v.type], ["Duration", v.days], ["Grouping", v.group], ["Stages", pick.join(" → ")]])}
+        <p><b>Materials:</b> ${H.esc(ty.mat)}</p>
+        <table><thead><tr><th style="width:24%">Stage</th><th>What students do</th><th>Teacher's role</th></tr></thead>
+        <tbody>${stages.map((s) => `<tr><td><b>${H.esc(s[0])}</b></td><td>${H.esc(s[1])}</td><td>${H.esc(s[2])}</td></tr>`).join("")}</tbody></table>
+        ${pick.includes("Reflect") ? `<h3>Reflection questions for students</h3>${H.list(["What did I do today?", "What did I notice or discover?", `What did I learn about ${t}?`, "Where can I use this in my life?", "What would I do differently next time?"])}` : ""}
+        ${v.links.length ? `<h3>Cross-curricular links</h3>${H.list(v.links)}` : ""}
+        <h3>Evidence of learning</h3>${H.list(["Observation notes or sketches", "Reflection sheet answers", "Group presentation or product", "Application task"])}
+        ${v.safety ? `<h3>Safety and inclusion</h3><p>${H.esc(v.safety)}</p>` : ""}`;
+    }
+  });
+
+  /* ================= 4. ASSESSMENT ================= */
+  const METHODS = {
+    "Oral questioning": "Ask questions during the lesson; note who answers well and who hesitates.",
+    "Observation checklist": "Watch students during group work and tick observed skills.",
+    "Worksheet": "Short written task that checks understanding of key ideas.",
+    "Quiz": "5–10 quick questions (use the MCQ quiz option of the Question / Worksheet / MCQ Generator to create and play it).",
+    "Project / model": "Students make a product that shows what they learned.",
+    "Presentation": "Students explain their work to the class.",
+    "Peer assessment": "Students give feedback to a partner using a simple checklist.",
+    "Self assessment": "Students rate their own understanding with smileys or a scale.",
+    "Portfolio": "Collect samples of work over time to show progress."
+  };
+  const RUBRIC = ["Understanding of ideas", "Accuracy", "Organisation", "Presentation", "Creativity", "Teamwork", "Use of vocabulary", "Spelling and punctuation"];
+  const LEVELS = { "3 levels": ["Beginning", "Developing", "Achieved"], "4 levels": ["Beginning", "Developing", "Proficient", "Excellent"] };
+  const DESC = [(c) => `Shows little ${c.toLowerCase()}; needs a lot of support.`, (c) => `Shows some ${c.toLowerCase()}; needs some support.`, (c) => `Shows good ${c.toLowerCase()} with few errors.`, (c) => `Shows excellent ${c.toLowerCase()}; works independently and can help others.`];
+  SKPlanner({
+    mount: "#planner-assessment", idPrefix: "as_", key: "assessments", noun: "assessment plan",
+    emptyText: "Type a topic to plan the assessment, rubric and exit tickets.", emptyIcon: "✅",
+    title: (v) => "Assessment: " + (v.topic || "topic"),
+    fields: [
+      { id: "topic", label: "Topic", placeholder: "e.g. Writing a paragraph" },
+      { id: "subject", label: "Subject", type: "select", placeholder: "Select subject", options: SUBJECTS, half: true },
+      { id: "cls", label: "Class", half: true, placeholder: "e.g. Class 6" },
+      { id: "kind", label: "Assessment type", type: "select", options: ["Formative (during learning)", "Summative (end of unit)", "Diagnostic (before teaching)"], ignoreEmpty: true },
+      { id: "methods", label: "Assessment method", type: "checks", options: Object.keys(METHODS), value: ["Oral questioning", "Worksheet", "Self assessment"], ignoreEmpty: true },
+      { id: "rubric", label: "Rubric criteria (tick what you will assess)", type: "checks", options: RUBRIC, value: ["Understanding of ideas", "Accuracy", "Presentation"], ignoreEmpty: true },
+      { id: "criteria", label: "Add your own criteria (one per line)", type: "lines", rows: 2 },
+      { id: "levels", label: "Rubric levels", type: "select", options: Object.keys(LEVELS), half: true, ignoreEmpty: true },
+      { id: "tickets", label: "Exit tickets per page", type: "select", options: ["0", "4", "6", "8"], value: "6", half: true, ignoreEmpty: true },
+      { id: "exitQ", label: "Exit ticket question", placeholder: "e.g. Write one thing you learned today." }
+    ],
+    example: { topic: "Writing a paragraph", subject: "English", cls: "Class 6", kind: "Formative (during learning)", methods: ["Observation checklist", "Worksheet", "Peer assessment", "Self assessment"],
+      rubric: ["Understanding of ideas", "Organisation", "Use of vocabulary", "Spelling and punctuation"], criteria: [], levels: "4 levels", tickets: "6", exitQ: "Write a topic sentence about your favourite festival." },
+    actions: [{ label: "🎟 Print Exit Ticket", run: (ctx) => {
+      const block = ctx.doc.querySelector(".tickets-block");
+      if (!block) { toast(ctx.read().topic ? "Set “Exit tickets per page” to 4, 6 or 8 first" : "Type a topic first"); return; }
+      printEl(block);
+    } }],
+    render(v, H) {
+      if (!v.topic) return `<div class="empty"><div class="e-icon">✅</div><p>Type a <b>topic</b> to plan the assessment.</p></div>`;
+      const t = v.topic, lv = LEVELS[v.levels] || LEVELS["3 levels"];
+      const crit = [...new Set(v.rubric.concat(v.criteria))].length ? [...new Set(v.rubric.concat(v.criteria))] : ["Understanding of ideas", "Accuracy", "Presentation"];
+      const di = lv.length === 3 ? [0, 1, 3] : [0, 1, 2, 3];
+      const nT = +v.tickets || 0, q = v.exitQ || `Write one thing you learned about ${t} today.`;
+      return `<h2>Assessment plan: ${H.esc(t)}</h2>
+        ${H.meta([["Subject", v.subject], ["Class", v.cls], ["Type", v.kind]])}
+        <h3>Assessment methods</h3>
+        <table><tbody>${(v.methods.length ? v.methods : ["Oral questioning"]).map((m) => `<tr><th style="width:30%">${m}</th><td>${H.esc(METHODS[m])}</td></tr>`).join("")}</tbody></table>
+        <h3>Rubric</h3>
+        <table><thead><tr><th>Criteria</th>${lv.map((l, i) => `<th>${l} (${i + 1})</th>`).join("")}</tr></thead>
+        <tbody>${crit.map((c) => `<tr><td><b>${H.esc(c)}</b></td>${di.map((d) => `<td class="small">${H.esc(DESC[d](c))}</td>`).join("")}</tr>`).join("")}</tbody></table>
+        <p class="small muted">Total: ____ / ${crit.length * lv.length}</p>
+        ${v.methods.includes("Self assessment") ? `<h3>Self assessment</h3><p>How well do I understand ${H.esc(t)}? (circle one)</p><div class="smile"><span>😀 I can teach it</span><span>🙂 I understand</span><span>😐 Still learning</span></div>` : ""}
+        ${nT ? `<div class="tickets-block"><h3>Exit tickets (cut along the dashed lines)</h3><div class="tickets">${Array.from({ length: nT }, () =>
+          `<div class="ticket"><b>🎟 Exit ticket · ${H.esc(t)}</b>${H.esc(q)}<div class="ln"></div><div class="ln"></div><div class="small muted" style="margin-top:6px">Name: __________</div></div>`).join("")}</div></div>` : ""}`;
+    }
+  });
+
+  /* ================= start ================= */
+  showTab(location.hash.slice(1) || store.get("suite:tab", "individual"));
+})();
 </script>
 </body>
 </html>

@@ -6,22 +6,24 @@ window.SKILLYFAI = {
 
   sections: [
     { id: "toolkit", name: "Teacher Toolkit", icon: "🧰", tint: "var(--primary-soft)", color: "var(--primary-ink)",
-      blurb: "Plan lessons, design activities and run classroom games in minutes." },
-    { id: "reading", name: "Reading & Language", icon: "📖", tint: "var(--mint-soft)", color: "var(--mint)",
-      blurb: "Pronunciation, phonics, word reading, fluency and vocabulary practice for children." },
+      blurb: "Plan lessons, design activities and create questions, worksheets and quizzes in minutes." },
+    { id: "reading", name: "Reading Practice", icon: "📖", tint: "var(--mint-soft)", color: "var(--mint)",
+      blurb: "Pronunciation, blending and reading fluency practice for children." },
     { id: "writing", name: "Writing Development", icon: "✏️", tint: "var(--coral-soft)", color: "var(--coral)",
-      blurb: "Tracing, handwriting sheets, sentence building and creative writing prompts." }
+      blurb: "Tracing, handwriting sheets, sentence building and creative writing prompts." },
+    { id: "tarl", name: "TARL Lesson Plans", icon: "🎯", tint: "var(--amber-soft)", color: "var(--amber)",
+      blurb: "90-day Literacy and 90-day Numeracy lesson plans based on the TaRL (Teaching at the Right Level) teacher manual." }
   ],
 
   categories: [
     { id: "planning", section: "toolkit", name: "Lesson Planning", icon: "🗂️" },
     { id: "activity", section: "toolkit", name: "Activity Planning", icon: "🧩" },
-    { id: "games", section: "toolkit", name: "Educational Games", icon: "🎲" },
-    { id: "reading", section: "reading", name: "Reading & Language", icon: "📖" },
-    { id: "writing", section: "writing", name: "Writing Development", icon: "✏️" }
+    { id: "reading", section: "reading", name: "Reading Practice", icon: "📖" },
+    { id: "writing", section: "writing", name: "Writing Development", icon: "✏️" },
+    { id: "tarl", section: "tarl", name: "TARL Lesson Plans", icon: "🎯" }
   ],
 
-  /* status: ready | app (existing Sound Friends app) | beta */
+  /* status: ready | beta */
   tools: [
     // ---- Lesson planning
     { id: "lesson-plan", cat: "planning", name: "Lesson Plan Generator", icon: "📝", tint: "var(--primary-soft)",
@@ -30,59 +32,40 @@ window.SKILLYFAI = {
     { id: "learning-outcomes", cat: "planning", name: "Learning Outcomes Planner", icon: "🎯", tint: "var(--primary-soft)",
       desc: "Enter subject, class and topic to get 6–8 numbered, measurable learning outcomes.",
       url: "tools/learning-outcomes.html", status: "ready", keys: "bloom objectives outcomes swbat verbs competencies" },
-    { id: "teaching-strategy", cat: "planning", name: "Teaching Strategy Planner", icon: "🧭", tint: "var(--primary-soft)",
-      desc: "Get strategy suggestions that fit your class size, time, resources and topic.",
-      url: "tools/teaching-strategy.html", status: "ready", keys: "pedagogy methods jigsaw think pair share inquiry" },
-    { id: "question-generator", cat: "planning", name: "Classroom Question Generator", icon: "❓", tint: "var(--primary-soft)",
-      desc: "Generate recall-to-creative questions for any topic, at every thinking level.",
-      url: "tools/question-generator.html", status: "ready", keys: "questions hots bloom oral questioning worksheet" },
+    { id: "question-generator", cat: "planning", name: "Question / Worksheet / MCQ Generator", icon: "❓", tint: "var(--primary-soft)",
+      desc: "Create a question list, a printable worksheet or an MCQ quiz you can play, print or share. Pick the type from a menu.",
+      url: "tools/question-generator.html", status: "ready", keys: "questions hots bloom oral questioning worksheet mcq quiz maker test multiple choice share print answer key play" },
 
     // ---- Activity planning
-    { id: "activity-planner", cat: "activity", name: "Classroom Activity Planner", icon: "🗓️", tint: "var(--sky-soft)",
-      desc: "Browse ready activities by subject, time and grouping, then build an activity sheet.",
-      url: "tools/activity-planner.html", status: "ready", keys: "activities warm up energiser starter plenary" },
-    { id: "group-activity", cat: "activity", name: "Group Activity Creator", icon: "👥", tint: "var(--sky-soft)",
-      desc: "Make fair random groups from your class list and assign roles and tasks.",
-      url: "tools/group-activity.html", status: "ready", keys: "groups teams roles random roster cooperative" },
-    { id: "experiential", cat: "activity", name: "Experiential Learning Activities", icon: "🌱", tint: "var(--sky-soft)",
-      desc: "Plan learning-by-doing activities around the Do, Reflect, Learn and Apply cycle.",
-      url: "tools/experiential-learning.html", status: "ready", keys: "kolb hands on project field trip art integrated" },
-    { id: "assessment", cat: "activity", name: "Assessment Activity Planner", icon: "✅", tint: "var(--sky-soft)",
-      desc: "Pick assessment methods, build a rubric and print exit tickets.",
-      url: "tools/assessment-planner.html", status: "ready", keys: "rubric formative summative exit ticket evaluation" },
-
-    // ---- Games
-    { id: "game-creator", cat: "games", name: "Educational Game Creator", icon: "🏆", tint: "var(--amber-soft)",
-      desc: "Create a team quiz board game with categories and points, then play it on the big screen.",
-      url: "tools/game-creator.html", status: "ready", keys: "jeopardy board teams points game show" },
-    { id: "quiz-maker", cat: "games", name: "Quiz Maker", icon: "🧠", tint: "var(--amber-soft)",
-      desc: "Write multiple-choice quizzes, play them in class, print with answer key or share by link.",
-      url: "tools/quiz-maker.html", status: "ready", keys: "mcq test quiz questions share print answer key" },
-    { id: "word-match", cat: "games", name: "Word Matching Game", icon: "🔗", tint: "var(--amber-soft)",
-      desc: "Turn word pairs into a tap-to-match game: words and meanings, opposites, translations.",
-      url: "tools/word-match.html", status: "ready", keys: "match pairs vocabulary opposites memory game" },
-    { id: "classroom-activities", cat: "games", name: "Classroom Interactive Activities", icon: "⏱️", tint: "var(--amber-soft)",
-      desc: "Timer, name picker, spin wheel, dice, scoreboard and noise-level signal for the board.",
-      url: "tools/classroom-activities.html", status: "ready", keys: "timer random name picker wheel dice scoreboard" },
+    { id: "activity-suite", cat: "activity", name: "Activity Planning Suite", icon: "🧩", tint: "var(--sky-soft)",
+      desc: "Plan individual, group, experiential, and assessment activities all in one place.",
+      url: "tools/activity-planner.html", status: "ready",
+      keys: "activities activity planner warm up energiser starter plenary groups teams roles random roster cooperative experiential kolb hands on project field trip art integrated assessment rubric formative summative exit ticket evaluation" },
 
     // ---- Reading & language
-    { id: "pronunciation", cat: "reading", name: "Pronunciation Practice", icon: "🗣️", tint: "var(--mint-soft)",
-      desc: "Tap letters to hear their sounds; teachers can record and tune sounds. Part of Sound Friends.",
-      url: "apps/sound-friends/index.html#s1", status: "app", keys: "letter sounds alphabet record voice sound friends" },
-    { id: "phonics", cat: "reading", name: "Phonics Practice", icon: "🔤", tint: "var(--mint-soft)",
-      desc: "Blend sounds into words level by level, from CVC words to consonant clusters.",
-      url: "apps/sound-friends/index.html#s2", status: "app", keys: "blending cvc digraph clusters sound friends" },
-    { id: "word-reading", cat: "reading", name: "Word Reading Practice", icon: "🃏", tint: "var(--mint-soft)",
-      desc: "Sight-word flashcards with listen, say-it-back and known/learning tracking.",
-      url: "tools/word-reading.html", status: "ready", keys: "sight words flashcards dolch high frequency speak" },
+    { id: "rd-letters", cat: "reading", name: "Letter Sounds", icon: "🔤", tint: "var(--mint-soft)",
+      desc: "Tap any letter to hear its sound and a picture word.",
+      url: "apps/sound-friends/index.html#s1", status: "ready", keys: "letters sounds alphabet phonics pronunciation" },
+    { id: "rd-blend", cat: "reading", name: "Blending Words", icon: "🧩", tint: "var(--mint-soft)",
+      desc: "Blend letter sounds together to read whole words.",
+      url: "apps/sound-friends/index.html#s2", status: "ready", keys: "blend blending words phonics cvc pronunciation" },
+    { id: "rd-sentences", cat: "reading", name: "Sentence Reading", icon: "📖", tint: "var(--mint-soft)",
+      desc: "Read simple sentences aloud, word by word.",
+      url: "apps/sound-friends/index.html#snSec", status: "ready", keys: "sentences reading aloud" },
+    { id: "rd-scan", cat: "reading", name: "Scan & Read", icon: "📷", tint: "var(--mint-soft)",
+      desc: "Read pages from your own book or a photo, with each word read aloud.",
+      url: "apps/sound-friends/index.html#scSec", status: "ready", keys: "scan read photo book ocr" },
+    { id: "rd-record", cat: "reading", name: "Record & Listen", icon: "🎙️", tint: "var(--mint-soft)",
+      desc: "Record your voice and listen back to check your pronunciation.",
+      url: "apps/sound-friends/index.html#s5", status: "ready", keys: "record voice listen pronunciation" },
     { id: "fluency", cat: "reading", name: "Reading Fluency Practice", icon: "⏳", tint: "var(--mint-soft)",
       desc: "Listen to a model reading, then time a read-aloud and get words-correct-per-minute.",
       url: "tools/reading-fluency.html", status: "ready", keys: "wcpm fluency timer passage read aloud running record" },
-    { id: "vocabulary", cat: "reading", name: "Vocabulary Development", icon: "💬", tint: "var(--mint-soft)",
-      desc: "Word cards with meanings and examples, word of the day and listen-and-choose games.",
-      url: "tools/vocabulary.html", status: "ready", keys: "vocabulary meaning word bank synonyms word of the day" },
 
     // ---- Writing
+    { id: "writing-practice", cat: "writing", name: "Writing Practice", icon: "✍️", tint: "var(--coral-soft)",
+      desc: "Beginner, intermediate and advanced writing: 28 skill areas with interactive practice, an activity generator, A4 worksheets and progress tracking.",
+      url: "writing-practice/index.html", status: "ready", keys: "writing practice pre-writing gross motor fine motor pencil grip scribbling strokes curves alphabet assamese cvc dictation paragraph story diary letter application editing worksheet generator progress" },
     { id: "letter-writing", cat: "writing", name: "Letter Writing Practice", icon: "🔠", tint: "var(--coral-soft)",
       desc: "Trace capital and small letters on screen, or write a letter with a guided frame.",
       url: "tools/letter-writing.html", status: "ready", keys: "alphabet tracing abc letter format formal informal" },
@@ -100,7 +83,15 @@ window.SKILLYFAI = {
       url: "tools/copy-writing.html", status: "ready", keys: "copy writing transcription model passage" },
     { id: "creative-writing", cat: "writing", name: "Creative Writing Prompts", icon: "💡", tint: "var(--coral-soft)",
       desc: "Story starters, picture prompts and story dice with a writing timer and word bank.",
-      url: "tools/creative-writing.html", status: "ready", keys: "story prompts imagination journal story dice" }
+      url: "tools/creative-writing.html", status: "ready", keys: "story prompts imagination journal story dice" },
+
+    // ---- TARL
+    { id: "tarl-literacy", cat: "tarl", name: "TARL Literacy Lesson Plans", icon: "📖", tint: "var(--amber-soft)",
+      desc: "90 daily TARL literacy lesson plans: pick a day, generate the plan, then print it or save it as a PDF.",
+      url: "tarl/literacy.html", status: "ready", keys: "tarl teaching at the right level literacy 90 day lesson plan story sound symbol mind mapping reading assessment baseline midline endline" },
+    { id: "tarl-numeracy", cat: "tarl", name: "TARL Numeracy Lesson Plans", icon: "🔢", tint: "var(--amber-soft)",
+      desc: "90 daily TARL numeracy lesson plans: stick bundles, number sense and word problems, for any day from 1 to 90.",
+      url: "tarl/numeracy.html", status: "ready", keys: "tarl teaching at the right level numeracy maths math 90 day lesson plan number sense word problems stick bundle assessment baseline midline endline" }
   ],
 
   /* Extra entry points into the existing Sound Friends app */
@@ -108,7 +99,7 @@ window.SKILLYFAI = {
     url: "apps/sound-friends/index.html",
     parts: [
       { name: "Letters", hash: "s1" }, { name: "Blend", hash: "s2" }, { name: "Sentences", hash: "snSec" },
-      { name: "Scan & Read", hash: "scSec" }, { name: "My Path", hash: "pathSec" }, { name: "Record", hash: "s5" }
+      { name: "Scan & Read", hash: "scSec" }, { name: "Record", hash: "s5" }
     ]
   }
 };

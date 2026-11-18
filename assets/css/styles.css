@@ -472,15 +472,46 @@ button, input, select, textarea { font: inherit; color: inherit; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
+/* ---------- Tabs (tools that bundle several panels on one page) ---------- */
+.tabbar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 5px; box-shadow: var(--shadow-sm); }
+.tab-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px; text-align: center;
+  border: 0; background: transparent; color: var(--muted); font-weight: 700; font-size: .95rem;
+  padding: 12px 10px; border-radius: 11px; cursor: pointer; position: relative; transition: background .15s, color .15s;
+}
+.tab-btn:hover { color: var(--text); background: var(--bg-soft); }
+.tab-btn .ti { font-size: 1.15rem; }
+.tab-btn small { display: block; font-weight: 500; font-size: .72rem; color: var(--faint); }
+.tab-btn.active { color: var(--primary-ink); background: var(--primary-soft); }
+.tab-btn.active::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: 2px; height: 3px; border-radius: 3px; background: var(--primary); }
+.tab-pane { display: none; padding-top: 18px; }
+.tab-pane.active { display: block; }
+@media (max-width: 700px) { .tabbar { grid-template-columns: 1fr 1fr; gap: 4px; } .tab-btn { padding: 11px 8px; font-size: .9rem; } .tab-btn small { display: none; } }
+
 /* ---------- Print ---------- */
+#printOnly { display: none; }
 @media print {
   @page { margin: 14mm; }
   body { background: #fff !important; color: #000 !important; display: block; }
   .site-header, .site-footer, .no-print, .toast { display: none !important; }
-  body.printing-one * { visibility: hidden; }
-  body.printing-one .print-area, body.printing-one .print-area * { visibility: visible; }
-  body.printing-one .print-area { position: absolute; left: 0; top: 0; width: 100%; border: 0 !important; box-shadow: none !important; padding: 0 !important; }
-  .print-area .no-print { display: none !important; }
+  /* printEl() puts a copy of one element in #printOnly; everything else is hidden */
+  body.printing-one > *:not(#printOnly) { display: none !important; }
+  body.printing-one #printOnly { display: block !important; color: #000; }
+  #printOnly .no-print { display: none !important; }
+  #printOnly .panel { border: 0 !important; box-shadow: none !important; padding: 0 !important; background: #fff !important; }
   .doc .meta, .doc th { background: #f3f3f3 !important; }
   a { color: #000; text-decoration: none; }
 }
+
+/* Dropdown in the main menu (TARL Lesson Plans) */
+.nav-dd { position: relative; }
+.nav-dd-btn { font: inherit; display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 10px; border: 0; background: transparent; color: var(--muted); font-weight: 600; font-size: .95rem; cursor: pointer; }
+.nav-dd-btn:hover, .nav-dd.open .nav-dd-btn { color: var(--text); background: var(--bg-soft); }
+.nav-dd.is-active .nav-dd-btn { color: var(--primary-ink); background: var(--primary-soft); }
+.nav-dd-btn .caret { width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg) translateY(-2px); }
+.nav-dd-menu { position: absolute; top: calc(100% + 6px); left: 0; min-width: 230px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-lg); padding: 6px; display: none; z-index: 60; }
+.nav-dd:hover .nav-dd-menu, .nav-dd:focus-within .nav-dd-menu, .nav-dd.open .nav-dd-menu { display: block; }
+.nav-dd-menu a { display: block; padding: 10px 12px; border-radius: 10px; white-space: nowrap; }
+.mn-group { margin: 4px 0; padding: 4px 0; border-top: 1px solid var(--border); }
+.mn-label { display: block; padding: 8px 12px 2px; font-size: .74rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--faint); }
+.mn-group a { padding-left: 24px; }

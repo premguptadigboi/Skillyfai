@@ -39,11 +39,20 @@
   const links = [
     { id: "home", name: "Home", href: "index.html" },
     { id: "toolkit", name: "Teacher Toolkit", href: "index.html#toolkit" },
-    { id: "reading", name: "Reading & Language", href: "index.html#reading" },
-    { id: "writing", name: "Writing", href: "index.html#writing" },
-    { id: "sound-friends", name: "Sound Friends", href: S.soundFriends.url }
+    { id: "reading", name: "Reading Practice", href: "index.html#reading" },
+    { id: "writing-practice", name: "Writing Practice", href: "writing-practice/index.html" },
+    { id: "tarl", name: "TARL Lesson Plans", children: [
+      { id: "tarl-literacy", name: "Literacy Lesson Plans", href: "tarl/literacy.html" },
+      { id: "tarl-numeracy", name: "Numeracy Lesson Plans", href: "tarl/numeracy.html" } ] },
   ];
-  const navHTML = (cls) => links.map((l) => `<a href="${url(l.href)}" class="${l.id === page ? "active" : ""}">${l.name}</a>`).join("");
+  const isOn = (l) => l.id === page || (l.children && l.children.some((c) => c.id === page));
+  const navHTML = (mobile) => links.map((l) => {
+    if (!l.children) return `<a href="${url(l.href)}" class="${isOn(l) ? "active" : ""}">${l.name}</a>`;
+    const kids = l.children.map((c) => `<a href="${url(c.href)}" class="${c.id === page ? "active" : ""}" role="menuitem">${c.name}</a>`).join("");
+    return mobile
+      ? `<div class="mn-group"><span class="mn-label">${l.name}</span>${kids}</div>`
+      : `<div class="nav-dd ${isOn(l) ? "is-active" : ""}"><button type="button" class="nav-dd-btn" aria-haspopup="true" aria-expanded="false">${l.name}<span class="caret" aria-hidden="true"></span></button><div class="nav-dd-menu" role="menu">${kids}</div></div>`;
+  }).join("");
 
   const header = h(`
     <header class="site-header">
@@ -59,7 +68,7 @@
           <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">${ICON.menu}</button>
         </div>
       </div>
-      <nav class="mobile-nav" id="mobileNav" aria-label="Mobile">${navHTML()}</nav>
+      <nav class="mobile-nav" id="mobileNav" aria-label="Mobile">${navHTML(true)}</nav>
     </header>`);
   document.body.prepend(header);
 
@@ -70,6 +79,13 @@
     const next = isDark() ? "light" : "dark";
     document.documentElement.dataset.theme = next; store.set("theme", next); paintTheme();
   };
+  $$(".nav-dd").forEach((dd) => {
+    const b = $(".nav-dd-btn", dd);
+    const set = (o) => { dd.classList.toggle("open", o); b.setAttribute("aria-expanded", o); };
+    b.addEventListener("click", (e) => { e.stopPropagation(); set(!dd.classList.contains("open")); });
+    dd.addEventListener("keydown", (e) => { if (e.key === "Escape") { set(false); b.focus(); } });
+    document.addEventListener("click", (e) => { if (!dd.contains(e.target)) set(false); });
+  });
   $("#menuBtn").onclick = (e) => {
     const m = $("#mobileNav"); const open = m.classList.toggle("open");
     e.currentTarget.setAttribute("aria-expanded", open);
@@ -154,13 +170,16 @@
     download(name.replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-") + ".doc", html, "application/msword");
   }
   /* Print one element only */
+  /* Prints only this element: a copy is placed in #printOnly and everything else is hidden by the print styles */
   function printEl(el) {
-    document.body.classList.add("printing-one");
-    $$(".print-area").forEach((x) => x.classList.remove("print-area"));
-    el.classList.add("print-area");
+    clearPrint();
+    const box = document.createElement("div"); box.id = "printOnly"; const copy = el.cloneNode(true); copy.removeAttribute("hidden"); box.append(copy);
+    box.querySelectorAll("[hidden]").forEach((x) => x.removeAttribute("hidden"));
+    document.body.append(box); document.body.classList.add("printing-one");
     window.print();
   }
-  window.addEventListener("afterprint", () => document.body.classList.remove("printing-one"));
+  function clearPrint() { const b = document.getElementById("printOnly"); if (b) b.remove(); document.body.classList.remove("printing-one"); }
+  window.addEventListener("afterprint", clearPrint);
 
   /* ---------- random ---------- */
   const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };

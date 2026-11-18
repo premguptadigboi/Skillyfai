@@ -55,7 +55,7 @@
     }
     const pos = (e) => { const r = ink.getBoundingClientRect(); return [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height]; };
     ink.addEventListener("pointerdown", (e) => { e.preventDefault(); ink.setPointerCapture(e.pointerId); cur = { c: color, p: [pos(e)] }; strokes.push(cur); drawInk(); });
-    ink.addEventListener("pointermove", (e) => { if (!cur) return; e.preventDefault(); (e.getCoalescedEvents ? e.getCoalescedEvents() : [e]).forEach((ev) => cur.p.push(pos(ev))); drawInk(); });
+    ink.addEventListener("pointermove", (e) => { if (!cur) return; e.preventDefault(); ((e.getCoalescedEvents && e.getCoalescedEvents().length) ? e.getCoalescedEvents() : [e]).forEach((ev) => cur.p.push(pos(ev))); drawInk(); });
     const end = () => { if (cur) { cur = null; onStroke && onStroke(); } };
     ink.addEventListener("pointerup", end); ink.addEventListener("pointercancel", end);
     new ResizeObserver(size).observe(wrap);
